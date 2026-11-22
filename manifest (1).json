@@ -1,0 +1,13 @@
+{
+  "name": "Šarišský dino",
+  "short_name": "ŠDino",
+  "start_url": "https://martinpetrik07-beep.github.io/saris-saprint/",
+  "display": "standalone",
+  "background_color": "#0b0f17",
+  "theme_color": "#f59e0b",
+  "description": "Hra, v ktorá je podobná google Dino ale viete si prilepšiť skiny, krajinky a získať rôzne findy, rebríčky, v ktorom bojujete o 1. Miesto",
+  "orientation": "natural",
+  "categories": [
+    "games"
+  ]
+}
