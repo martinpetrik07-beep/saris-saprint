@@ -1,0 +1,2906 @@
+<!DOCTYPE html>
+<html lang="sk" class="dark"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNTMxNzY5MjEwNjYzMDMxNzIxOSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2Y1NTcxNGQ4OTZhZWIwNGJfaW5kZXguaHRtbC02MTkifSwiZXhwIjoxNzk1MzYxNDY3LCJpYXQiOjE3OTUzNTc4NjcsImFsZyI6IlJTMjU2In0.okqpTQiIx0VKhHQqxeB0Yzt_XKGr08QU2DAG6BpMrqfkM17ygYA8L5iXRFeiOSI8e8fMvWCk9tGHubzCnx6I0XtdMExayLalUzR4tPGeOr2iLq6cav6uY8-ZyFOiRjhZsRDeIaQxhyoWllLyh-Ef-s2tSzgqKYz1UVMs83cGbE-jEUMnm-Q7Fmp6lofCiozguAs7YMH8ppeGwoJUaVgzrvzvfoNCqOf9-z2YtV1B-E9RzazjzKqlhMWsNxC428JPicm9E0Tx7jHv3bWe5TCs_sKzsxophSVXm0KwZZPViZffGRahJvNJwCcD497PfmgdTbGlYBU9cVnV69ou2FCIeg","c_f55714d896aeb04b_index.html-619")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.i=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.extensions="";var l=0,t=null,r=null,q=[],F=new TextEncoder,
+G=new TextDecoder;c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*
+16|0;return(f==="x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;
+(g=t)==null||g.postMessage(a)}};Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  const OVERLAY_SELECTOR =
+    'dialog[open], [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"]';
+
+  function isVisibleOverlay(element) {
+    if (element.closest('[hidden], [aria-hidden="true"], [inert]')) {
+      return false;
+    }
+    if (window.getComputedStyle(element).visibility === 'hidden') {
+      return false;
+    }
+    for (let cur = element; cur; cur = cur.parentElement) {
+      if (window.getComputedStyle(cur).display === 'none') {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function hasOpenOverlay() {
+    const candidates = document.querySelectorAll(OVERLAY_SELECTOR);
+    for (let i = 0; i < candidates.length; i++) {
+      if (isVisibleOverlay(candidates[i])) {
+        return true;
+      }
+    }
+    try {
+      if (document.querySelector('[popover]:popover-open')) {
+        return true;
+      }
+    } catch (e) {
+      // Ignore engines that do not support :popover-open.
+    }
+    return false;
+  }
+
+  function isNonEmptySearchInput(target) {
+    return (
+      Boolean(target) &&
+      target.tagName === 'INPUT' &&
+      typeof target.type === 'string' &&
+      target.type.toLowerCase() === 'search' &&
+      typeof target.value === 'string' &&
+      target.value.length > 0
+    );
+  }
+
+  function shouldIgnoreEscape(event) {
+    return (
+      event.key !== 'Escape' ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.isComposing ||
+      event.repeat ||
+      event.keyCode === 229 ||
+      isNonEmptySearchInput(event.target)
+    );
+  }
+
+  let shouldIgnoreCaptureState = false;
+
+  window.addEventListener(
+    'keydown',
+    function(event) {
+      if (event.key === 'Escape') {
+        shouldIgnoreCaptureState =
+          hasOpenOverlay() || isNonEmptySearchInput(event.target);
+      }
+    },
+    {capture: true},
+  );
+
+  window.addEventListener('keydown', function(event) {
+    if (
+      shouldIgnoreEscape(event) ||
+      event.defaultPrevented ||
+      shouldIgnoreCaptureState
+    ) {
+      return;
+    }
+    const wasBlockedOnCapture = shouldIgnoreCaptureState;
+    queueMicrotask(function() {
+      if (event.defaultPrevented || wasBlockedOnCapture) {
+        return;
+      }
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({'type': 'escapeKey'}, '*');
+      }
+    });
+  });
+})();</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0b0f17">
+    <meta name="description" content="Šariš Sprint: Dino z Východu - Nekonečná východniarska dinosauria naháňačka!">
+    <title>Šariš Sprint: Dino z Východu</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        saris: {
+                            50: '#fff7ed',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            900: '#78350f',
+                        },
+                        darkbg: '#0b0f17',
+                        cardbg: '#161b22',
+                        bordercol: '#30363d'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Embedded PWA Manifest -->
+    <link rel="manifest" href="data:application/manifest+json;utf8,%7B%22name%22%3A%22%C5%A0ari%C5%A1%20Sprint%3A%20Dino%20z%20V%C3%BDchodu%22%2C%22short_name%22%3A%22%C5%A0ari%C5%A1%20Sprint%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b0f17%22%2C%22theme_color%22%3A%22%23f59e0b%22%7D">
+    
+    <!-- Dynamic SVG Favicon -->
+    <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230b0f17'/%3E%3Ccircle cx='50' cy='50' r='44' fill='%23f59e0b' opacity='0.2'/%3E%3Cpath d='M25 75 L50 35 L75 75 Z' fill='%2315803d'/%3E%3Crect x='35' y='45' width='30' height='25' rx='4' fill='%2322c55e'/%3E%3Ccircle cx='58' cy='52' r='3' fill='%23ffffff'/%3E%3Cpath d='M30 46 L65 42 L55 36 Z' fill='%23dc2626'/%3E%3C/svg%3E">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #0b0f17;
+            color: #f3f4f6;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #48515c;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #30363d;
+            background: #0d1117;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 900 / 360;
+        }
+
+        .r-common { background: #374151; color: #e5e7eb; }
+        .r-uncommon { background: #065f46; color: #6ee7b7; border: 1px solid #10b981; }
+        .r-rare { background: #1e3a8a; color: #93c5fd; border: 1px solid #3b82f6; }
+        .r-epic { background: #581c87; color: #e9d5ff; border: 1px solid #a855f7; }
+        .r-super-rare { background: #78350f; color: #fde68a; border: 1px solid #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
+        .r-extra-rare { background: #831843; color: #fbcfe8; border: 1px solid #f472b6; box-shadow: 0 0 12px rgba(244, 114, 182, 0.4); }
+
+        .toast-banner {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(15, 23, 42, 0.95);
+            color: #fbbf24;
+            border: 1px solid #fbbf24;
+            padding: 8px 20px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 25;
+            white-space: nowrap;
+        }
+
+        .toast-banner.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.7); }
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.inset-0{inset:0px}.z-20{z-index:20}.z-50{z-index:50}.my-1{margin-top:0.25rem;margin-bottom:0.25rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.ml-1{margin-left:0.25rem}.ml-auto{margin-left:auto}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-10{height:2.5rem}.h-12{height:3rem}.h-16{height:4rem}.h-full{height:100%}.w-10{width:2.5rem}.w-12{width:3rem}.w-16{width:4rem}.w-full{width:100%}.min-w-\[180px\]{min-width:180px}.max-w-5xl{max-width:64rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes bounce{0%, 100%{transform:translateY(-25%);animation-timing-function:cubic-bezier(0.8,0,1,1)}50%{transform:none;animation-timing-function:cubic-bezier(0,0,0.2,1)}}.animate-bounce{animation:bounce 1s infinite}.list-inside{list-style-position:inside}.list-decimal{list-style-type:decimal}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-\[\#30363d\]{--tw-border-opacity:1;border-color:rgb(48 54 61 / var(--tw-border-opacity, 1))}.border-\[\#374151\]{--tw-border-opacity:1;border-color:rgb(55 65 81 / var(--tw-border-opacity, 1))}.border-amber-500{--tw-border-opacity:1;border-color:rgb(245 158 11 / var(--tw-border-opacity, 1))}.border-amber-500\/30{border-color:rgb(245 158 11 / 0.3)}.border-amber-500\/40{border-color:rgb(245 158 11 / 0.4)}.border-amber-500\/50{border-color:rgb(245 158 11 / 0.5)}.border-gray-700{--tw-border-opacity:1;border-color:rgb(55 65 81 / var(--tw-border-opacity, 1))}.border-purple-500\/30{border-color:rgb(168 85 247 / 0.3)}.border-red-500\/50{border-color:rgb(239 68 68 / 0.5)}.border-red-500\/60{border-color:rgb(239 68 68 / 0.6)}.border-sky-500\/30{border-color:rgb(14 165 233 / 0.3)}.border-sky-500\/50{border-color:rgb(14 165 233 / 0.5)}.bg-\[\#0d1117\]{--tw-bg-opacity:1;background-color:rgb(13 17 23 / var(--tw-bg-opacity, 1))}.bg-\[\#161b22\]{--tw-bg-opacity:1;background-color:rgb(22 27 34 / var(--tw-bg-opacity, 1))}.bg-\[\#1f2937\]{--tw-bg-opacity:1;background-color:rgb(31 41 55 / var(--tw-bg-opacity, 1))}.bg-\[\#21262d\]{--tw-bg-opacity:1;background-color:rgb(33 38 45 / var(--tw-bg-opacity, 1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.bg-amber-500\/10{background-color:rgb(245 158 11 / 0.1)}.bg-amber-500\/15{background-color:rgb(245 158 11 / 0.15)}.bg-amber-500\/20{background-color:rgb(245 158 11 / 0.2)}.bg-gray-800{--tw-bg-opacity:1;background-color:rgb(31 41 55 / var(--tw-bg-opacity, 1))}.bg-red-500\/20{background-color:rgb(239 68 68 / 0.2)}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-sky-500\/10{background-color:rgb(14 165 233 / 0.1)}.bg-sky-500\/20{background-color:rgb(14 165 233 / 0.2)}.bg-slate-950\/80{background-color:rgb(2 6 23 / 0.8)}.bg-slate-950\/85{background-color:rgb(2 6 23 / 0.85)}.bg-slate-950\/90{background-color:rgb(2 6 23 / 0.9)}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-500{--tw-gradient-from:#f59e0b var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-600{--tw-gradient-from:#d97706 var(--tw-gradient-from-position);--tw-gradient-to:rgb(217 119 6 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-amber-500{--tw-gradient-to:#f59e0b var(--tw-gradient-to-position)}.to-amber-600{--tw-gradient-to:#d97706 var(--tw-gradient-to-position)}.to-amber-700{--tw-gradient-to:#b45309 var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-8{padding-left:2rem;padding-right:2rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.pb-2{padding-bottom:0.5rem}.pb-3{padding-bottom:0.75rem}.pb-4{padding-bottom:1rem}.pt-5{padding-top:1.25rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.leading-relaxed{line-height:1.625}.tracking-wide{letter-spacing:0.025em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-gray-100{--tw-text-opacity:1;color:rgb(243 244 246 / var(--tw-text-opacity, 1))}.text-gray-200{--tw-text-opacity:1;color:rgb(229 231 235 / var(--tw-text-opacity, 1))}.text-gray-300{--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-purple-300{--tw-text-opacity:1;color:rgb(216 180 254 / var(--tw-text-opacity, 1))}.text-red-300{--tw-text-opacity:1;color:rgb(252 165 165 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-sky-300{--tw-text-opacity:1;color:rgb(125 211 252 / var(--tw-text-opacity, 1))}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.drop-shadow{--tw-drop-shadow:drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-md{--tw-drop-shadow:drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:-translate-y-0\.5:hover{--tw-translate-y:-0.125rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:border-amber-400:hover{--tw-border-opacity:1;border-color:rgb(251 191 36 / var(--tw-border-opacity, 1))}.hover\:border-emerald-400:hover{--tw-border-opacity:1;border-color:rgb(52 211 153 / var(--tw-border-opacity, 1))}.hover\:border-sky-400:hover{--tw-border-opacity:1;border-color:rgb(56 189 248 / var(--tw-border-opacity, 1))}.hover\:bg-\[\#30363d\]:hover{--tw-bg-opacity:1;background-color:rgb(48 54 61 / var(--tw-bg-opacity, 1))}.hover\:bg-amber-400:hover{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity, 1))}.hover\:bg-amber-500\/30:hover{background-color:rgb(245 158 11 / 0.3)}.hover\:bg-gray-700:hover{--tw-bg-opacity:1;background-color:rgb(55 65 81 / var(--tw-bg-opacity, 1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.hover\:bg-red-500\/10:hover{background-color:rgb(239 68 68 / 0.1)}.hover\:bg-sky-500\/30:hover{background-color:rgb(14 165 233 / 0.3)}.hover\:from-amber-400:hover{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-amber-500:hover{--tw-gradient-to:#f59e0b var(--tw-gradient-to-position)}.hover\:text-amber-400:hover{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.hover\:text-emerald-300:hover{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.hover\:text-gray-200:hover{--tw-text-opacity:1;color:rgb(229 231 235 / var(--tw-text-opacity, 1))}.hover\:text-sky-300:hover{--tw-text-opacity:1;color:rgb(125 211 252 / var(--tw-text-opacity, 1))}.hover\:brightness-110:hover{--tw-brightness:brightness(1.1);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.focus\:border-amber-400:focus{--tw-border-opacity:1;border-color:rgb(251 191 36 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.active\:translate-y-0:active{--tw-translate-y:0px;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.sm\:h-14{height:3.5rem}.sm\:w-14{width:3.5rem}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:p-4{padding:1rem}.sm\:p-6{padding:1.5rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}}@media (min-width: 768px){.md\:p-6{padding:1.5rem}}@media (min-width: 1024px){.lg\:w-auto{width:auto}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:flex-row{flex-direction:row}.lg\:justify-end{justify-content:flex-end}}</style></head>
+<body class="flex flex-col items-center justify-center p-2 sm:p-4 md:p-6">
+
+    <!-- Main Container Card -->
+    <div class="w-full max-w-5xl bg-[#161b22] border border-[#30363d] rounded-2xl p-4 sm:p-6 shadow-2xl">
+        
+        <!-- HEADER WITH INTEGRATED BRANDING & HUD -->
+        <header class="flex flex-col lg:flex-row items-center justify-between gap-4 mb-4 pb-4 border-b border-[#30363d]">
+            
+            <!-- BRAND LOGO & TITLE -->
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 p-1 shadow-lg flex-shrink-0">
+                    <!-- Vector SVG Logo -->
+                    <svg class="w-full h-full rounded-lg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100" height="100" rx="16" fill="#0b0f17"></rect>
+                        <!-- Sun & Sky Glow -->
+                        <circle cx="50" cy="45" r="32" fill="#f59e0b" fill-opacity="0.25"></circle>
+                        <circle cx="50" cy="40" r="14" fill="#fbbf24"></circle>
+                        <!-- Hills -->
+                        <path d="M10 85 L45 45 L75 85 Z" fill="#15803d"></path>
+                        <path d="M40 85 L70 55 L95 85 Z" fill="#16a34a" fill-opacity="0.8"></path>
+                        <!-- Pixel Dino -->
+                        <rect x="36" y="52" width="28" height="22" rx="4" fill="#22c55e"></rect>
+                        <rect x="52" y="44" width="20" height="14" rx="3" fill="#22c55e"></rect>
+                        <circle cx="64" cy="48" r="2.5" fill="#ffffff"></circle>
+                        <circle cx="64" cy="48" r="1.2" fill="#000000"></circle>
+                        <!-- Folk Hat (Širák) with Feather -->
+                        <path d="M44 44 L72 40 L64 34 L48 36 Z" fill="#18181b"></path>
+                        <rect x="52" y="40" width="14" height="2" fill="#dc2626"></rect>
+                        <path d="M46 42 Q40 32 44 26" stroke="#facc15" stroke-width="2.5" stroke-linecap="round"></path>
+                        <!-- Ground line -->
+                        <rect x="0" y="84" width="100" height="16" fill="#78350f"></rect>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black text-amber-400 tracking-wide flex items-center gap-2">
+                        Šariš Sprint <span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">Dino z Východu</span>
+                    </h1>
+                    <p class="text-xs text-gray-400 font-medium">Spusť šprint cez chotáre, vyzbieraj dzedove peňeži a objav všetky poklady!</p>
+                </div>
+            </div>
+
+            <!-- HUD STATS BAR -->
+            <div class="flex flex-wrap items-center justify-center lg:justify-end gap-2 text-xs sm:text-sm font-bold w-full lg:w-auto">
+                <div id="hudUser" class="bg-[#0d1117] border border-purple-500/30 text-purple-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold">
+                    👤 <strong id="userBadge">Host</strong>
+                </div>
+                <div class="bg-[#0d1117] border border-[#30363d] text-gray-200 px-3 py-1.5 rounded-lg">
+                    PUNTY: <span id="scoreVal" class="text-emerald-400 font-black ml-1">0</span>
+                </div>
+                <div class="bg-amber-500/10 border border-amber-500/40 text-amber-300 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                    🪙 <span id="coinsVal" class="font-black">1</span>
+                </div>
+                <div class="bg-[#0d1117] border border-[#30363d] text-gray-300 px-3 py-1.5 rounded-lg">
+                    ČAS: <span id="timeVal" class="font-mono text-gray-100 ml-1">00:05</span>
+                </div>
+                <div class="bg-[#0d1117] border border-[#30363d] text-gray-300 px-3 py-1.5 rounded-lg">
+                    REKORD: <span id="bestVal" class="text-amber-400 font-black ml-1">17</span>
+                </div>
+                <div id="weatherBadge" class="bg-sky-500/10 border border-sky-500/30 text-sky-300 px-3 py-1.5 rounded-lg font-extrabold">🌇 ZÁPAD</div>
+            </div>
+
+        </header>
+
+        <!-- NAVIGATION BAR -->
+        <nav class="flex flex-wrap items-center gap-2 mb-4">
+            <button id="btnNavHra" type="button" class="nav-btn bg-amber-500/15 border-amber-500 text-amber-400 border px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition-all hover:border-amber-400">
+                🎮 Hra
+            </button>
+            <button id="btnNavShop" type="button" class="nav-btn bg-[#21262d] border-[#30363d] text-gray-300 border px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all hover:border-amber-400 hover:text-amber-400">
+                🛒 Obchod
+            </button>
+            <button id="btnNavFinds" type="button" class="nav-btn bg-[#21262d] border-[#30363d] text-gray-300 border px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all hover:border-amber-400 hover:text-amber-400">
+                🎒 Nálezy (Finds)
+            </button>
+            <button id="btnNavAccount" type="button" class="nav-btn bg-[#21262d] border-[#30363d] text-gray-300 border px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all hover:border-amber-400 hover:text-amber-400">
+                👤 Konto &amp; Admin
+            </button>
+            <button id="btnNavBoard" type="button" class="nav-btn bg-[#21262d] border-[#30363d] text-gray-300 border px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all hover:border-amber-400 hover:text-amber-400">
+                🏆 Rebríček
+            </button>
+
+            <!-- Secondary Actions -->
+            <div class="flex items-center gap-2 ml-auto flex-wrap">
+                <button id="btnNavZvuk" type="button" class="bg-[#1f2937] border-[#374151] text-gray-300 border px-3 py-2 rounded-xl text-xs font-bold transition-all hover:border-sky-400 hover:text-sky-300">🔊 Zvuk: ZAP</button>
+                <button id="btnNavShare" type="button" class="bg-[#1f2937] border-[#374151] text-gray-300 border px-3 py-2 rounded-xl text-xs font-bold transition-all hover:border-sky-400 hover:text-sky-300">
+                    📤 Zdieľať
+                </button>
+                <button id="btnNavSave" type="button" class="bg-[#1f2937] border-[#374151] text-gray-300 border px-3 py-2 rounded-xl text-xs font-bold transition-all hover:border-emerald-400 hover:text-emerald-300">
+                    💾 Uložiť súbor
+                </button>
+                <button id="btnNavApp" type="button" class="bg-gradient-to-r from-amber-600 to-amber-500 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs shadow-md transition-all hover:brightness-110">
+                    📲 Stiahnuť Appku
+                </button>
+            </div>
+        </nav>
+
+        <!-- VIEW 1: GAME CANVAS & OVERLAYS -->
+        <main id="viewHra" class="view-panel">
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="900" height="360"></canvas>
+
+                <!-- Floating Toast -->
+                <div id="toastBanner" class="toast-banner">⚡ Šariš turbo vyprchalo!</div>
+
+                <!-- START OVERLAY -->
+                <div id="startOverlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 gap-4 z-20 hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-3xl shadow-lg animate-bounce">
+                        🦖
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl font-black text-amber-400 drop-shadow-md">Ščymaj še, Dino!</h2>
+                    <p class="max-w-md text-sm text-gray-200 leading-relaxed font-medium">
+                        Preskakuj kaktusy, stromy, dedinčanov aj hydinu na východniarskych mapách! Zberaj vzácne artefakty zo zeme a získavaj dzedove peňeži za každých 10 puntov.
+                    </p>
+                    <button id="btnStart" type="button" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-8 py-3.5 rounded-xl text-base shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+                        ▶ Štartovať hru
+                    </button>
+                </div>
+
+                <!-- PAUSE OVERLAY -->
+                <div id="pauseOverlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 gap-4 z-20 hidden">
+                    <h2 class="text-3xl font-black text-amber-400">Pauza, bratu</h2>
+                    <p class="max-w-md text-sm text-gray-300">Hra je zastavená. Daj si ľadovú kofolu a pokračuj kedykoľvek.</p>
+                    <button id="btnResume" type="button" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-8 py-3 rounded-xl text-base shadow-lg transition-all">
+                        ▶ Pokračovať
+                    </button>
+                </div>
+
+                <!-- GAME OVER OVERLAY -->
+                <div id="gameOverOverlay" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 gap-3 z-20">
+                    <div class="text-4xl">💥</div>
+                    <h2 class="text-3xl font-black text-red-500 drop-shadow">Ta šak si padol!</h2>
+                    <p id="deathReason" class="text-sm font-semibold text-gray-200">Zrazil si sa s prekážkou na trati!</p>
+                    <p id="runSummary" class="text-xs sm:text-sm text-amber-300 bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-xl my-1 font-bold">Získal si 17 puntov a 🪙 1 dzedovych penezí.</p>
+                    <button id="btnRestart" type="button" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-8 py-3.5 rounded-xl text-base shadow-xl transition-all transform hover:-translate-y-0.5">
+                        🔄 Hrať znova
+                    </button>
+                </div>
+            </div>
+
+            <!-- ON-SCREEN TOUCH CONTROLS -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button id="btnCtrlStart" type="button" class="bg-[#21262d] border border-[#30363d] text-gray-100 font-extrabold px-4 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-[#30363d] active:scale-95 transition-all">
+                        ▶ Štart
+                    </button>
+                    <button id="btnCtrlPause" type="button" class="bg-[#21262d] border border-[#30363d] text-gray-100 font-extrabold px-4 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-[#30363d] active:scale-95 transition-all">
+                        ⏸ Pauza
+                    </button>
+                    <button id="btnCtrlJump" type="button" class="bg-amber-500/20 border border-amber-500/50 text-amber-300 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-amber-500/30 active:scale-95 transition-all">
+                        ⬆ Skok (Medzerník / ↑)
+                    </button>
+                    <button id="btnCtrlDuck" type="button" class="bg-sky-500/20 border border-sky-500/50 text-sky-300 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm hover:bg-sky-500/30 active:scale-95 transition-all">
+                        ⬇ Prikrčiť (↓ / S)
+                    </button>
+                </div>
+                <div class="text-xs text-gray-400 font-medium">
+                    Každých 10 puntov = 🪙 1 • Deň/Noc (60s) • Prikrčenie zrýchľuje spad!
+                </div>
+            </div>
+        </main>
+
+        <!-- VIEW 2: SHOP -->
+        <section id="viewShop" class="view-panel hidden">
+            <div class="bg-[#0d1117] border border-[#30363d] rounded-2xl p-5">
+                <div class="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-[#30363d]">
+                    <h3 class="text-lg font-black text-amber-400 flex items-center gap-2">
+                        🛒 Obchod Šariš
+                    </h3>
+                    <div class="text-sm font-black text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl">
+                        🪙 <span id="shopCoinsVal">1</span> dzedovych penezí
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mb-4">
+                    <button id="btnTabSkins" type="button" class="bg-amber-500/20 border-amber-500 text-amber-400 border px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                        🦖 Dino Skiny
+                    </button>
+                    <button id="btnTabMaps" type="button" class="bg-[#161b22] border-[#30363d] text-gray-400 border px-4 py-2 rounded-xl text-xs font-bold transition-all hover:text-gray-200">
+                        🌍 Mapy &amp; Prostredia
+                    </button>
+                </div>
+
+                <div id="gridDinoSkins" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                <div id="gridMapSkins" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 hidden"></div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: FINDS / ARTIFACTS -->
+        <section id="viewFinds" class="view-panel hidden">
+            <div class="bg-[#0d1117] border border-[#30363d] rounded-2xl p-5">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-[#30363d]">
+                    <h3 class="text-lg font-black text-amber-400 flex items-center gap-2">
+                        🎒 Nálezy a Poklady Východu
+                    </h3>
+                    <span class="text-xs text-gray-400">Zbieraj artefakty priamo zo zeme počas behu!</span>
+                </div>
+                <div id="listFinds" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: ACCOUNT & ADMIN PANEL -->
+        <section id="viewAccount" class="view-panel hidden">
+            <div class="bg-[#0d1117] border border-[#30363d] rounded-2xl p-5 space-y-6">
+                <!-- User Account Management -->
+                <div>
+                    <div class="flex items-center justify-between gap-4 mb-3">
+                        <h3 class="text-lg font-black text-amber-400">👤 Tvoje Konto</h3>
+                        <button id="btnLogout" type="button" class="bg-red-500/20 border border-red-500/50 text-red-300 font-bold px-3 py-1 rounded-lg text-xs hidden" style="display: none;">
+                            Odhlásiť sa
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-3">Zadaj meno a heslo (min. 4 znaky a 1 číslo) na ukladanie rekordu:</p>
+                    <div class="flex flex-wrap gap-2.5">
+                        <input id="inputUser" type="text" placeholder="Tvoje meno (napr. JožoŠariš)" class="flex-1 min-w-[180px] bg-[#161b22] border border-[#30363d] rounded-xl px-3.5 py-2 text-xs font-bold text-gray-100 focus:outline-none focus:border-amber-400">
+                        <input id="inputPass" type="password" placeholder="Heslo (min. 4 znaky + 1 číslo)" class="flex-1 min-w-[180px] bg-[#161b22] border border-[#30363d] rounded-xl px-3.5 py-2 text-xs font-bold text-gray-100 focus:outline-none focus:border-amber-400">
+                        <button id="btnAccountSubmit" type="button" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-5 py-2 rounded-xl text-xs shadow-md">
+                            Prihlásiť / Registrovať
+                        </button>
+                    </div>
+                    <div id="accountMsg" class="text-xs font-bold text-amber-400 mt-2">
+                        Momentálne hráš ako Host (bez uloženia do online rebríčka).
+                    </div>
+                </div>
+
+                <!-- Admin Section -->
+                <div class="pt-5 border-t border-[#30363d]">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/50 flex items-center justify-center text-lg text-red-400 shadow-md">
+                                🛡️
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-black text-red-400">ADMIN ZÓNA</h4>
+                                <p class="text-xs text-gray-400">Špeciálny správcovský panel</p>
+                            </div>
+                        </div>
+                        <button id="btnOpenAdminScreen" type="button" class="bg-[#161b22] border border-red-500/50 text-red-300 font-extrabold px-3.5 py-2 rounded-xl text-xs hover:bg-red-500/10">
+                            🛡️ Otvoriť Admin obrazovku
+                        </button>
+                    </div>
+
+                    <!-- Password Lock Box -->
+                    <div id="adminLockBox" class="mt-3 flex-wrap gap-2 items-center hidden">
+                        <input id="inputAdminPass" type="password" placeholder="Zadaj admin heslo..." class="flex-1 min-w-[180px] bg-[#161b22] border border-red-500/60 rounded-xl px-3.5 py-2 text-xs font-bold text-gray-100 focus:outline-none">
+                        <button id="btnAdminLogin" type="button" class="bg-red-600 hover:bg-red-500 text-white font-black px-4 py-2 rounded-xl text-xs shadow">
+                            Odomknúť
+                        </button>
+                        <div id="adminLockMsg" class="w-full text-xs font-bold text-red-400"></div>
+                    </div>
+
+                    <!-- Active Admin Panel -->
+                    <div id="adminSpecialScreen" class="mt-4 bg-[#161b22] border border-red-500/60 rounded-xl p-4 space-y-3 hidden flex-col">
+                        <div class="flex items-center justify-between border-b border-[#30363d] pb-2">
+                            <strong class="text-xs font-black text-red-400">🛡️ ŠPECIÁLNA ADMIN OBRAZOVKA</strong>
+                            <button id="btnAdminClose" type="button" class="bg-gray-800 text-gray-300 px-2.5 py-1 rounded text-xs">Zamknúť</button>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="btnAdminAdd100" type="button" class="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-700">+🪙 100 peňezí</button>
+                            <button id="btnAdminAdd800" type="button" class="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-700">+🪙 800 peňezí</button>
+                            <button id="btnAdminResetCoins" type="button" class="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-700">Vynulovať peňeži (0)</button>
+                            <button id="btnAdminUnlockAll" type="button" class="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-700">Odomknúť skiny a mapy</button>
+                            <button id="btnAdminUnlockFinds" type="button" class="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-700">Odomknúť všetky findy</button>
+                        </div>
+                        <div id="adminActionMsg" class="text-xs font-bold text-emerald-400">
+                            ✅ Admin režim aktívny.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 5: LEADERBOARD -->
+        <section id="viewLeaderboard" class="view-panel hidden">
+            <div class="bg-[#0d1117] border border-[#30363d] rounded-2xl p-5">
+                <div class="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-[#30363d]">
+                    <h3 class="text-lg font-black text-amber-400 flex items-center gap-2">
+                        🏆 Online Rebríček Východu
+                    </h3>
+                    <button id="btnRefreshBoard" type="button" class="bg-[#161b22] border border-[#30363d] text-gray-300 font-bold px-3 py-1.5 rounded-xl text-xs hover:border-amber-400">
+                        🔄 Obnoviť
+                    </button>
+                </div>
+                <div id="leaderboardList" class="space-y-2"></div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- PWA Install Modal -->
+    <div id="appModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-[#161b22] border-2 border-[#30363d] rounded-2xl p-6 max-w-md w-full space-y-4">
+            <h3 class="text-lg font-black text-amber-400 flex items-center gap-2">
+                📲 Ako inštalovať ako Android Appku (.APK)?
+            </h3>
+            <ol class="text-xs text-gray-300 space-y-2 leading-relaxed list-decimal list-inside font-medium">
+                <li>Klikni na <strong>💾 Uložiť súbor</strong> v lište a ulož súbor do mobilu.</li>
+                <li>Otvor bezplatný nástroj <strong>pwabuilder.com</strong> v prehliadači.</li>
+                <li>Nahraj tento uložený <code>index.html</code> súbor.</li>
+                <li>Klikni na <strong>Package for Android</strong> a stiahni si priamo balíček <code>.apk</code> pre Android!</li>
+            </ol>
+            <button id="btnCloseModal" type="button" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                Rozumiem
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN GAME ENGINE SCRIPT -->
+    <script>
+        // --- Storage Helpers ---
+        function safeGet(key, def) {
+            try {
+                const val = localStorage.getItem(key);
+                return val !== null ? val : def;
+            } catch (e) {
+                return def;
+            }
+        }
+
+        function safeSet(key, val) {
+            try {
+                localStorage.setItem(key, val);
+            } catch (e) {}
+        }
+
+        // --- Catalogs ---
+        const SKINS = [
+            { id: 'klasik', name: 'Klasik Google Dino', price: 0, bodyColor: '#535353', eyeColor: '#ffffff', hat: false, desc: 'Pôvodný sivý pixel-art dinosaurus' },
+            { id: 'vianocny', name: '🎅 Vianočný Dino', price: 25, bodyColor: '#16a34a', eyeColor: '#ffffff', hat: true, desc: 'Vysmrkaný vianočnou čiapočkou!' },
+            { id: 'zlaty_gazda', name: 'Zlatý Gazda', price: 50, bodyColor: '#eab308', eyeColor: '#000000', hat: false, desc: 'Žiari ako novučičký dukát zo Šariša' },
+            { id: 'burkovy', name: 'Búrkový Dino', price: 80, bodyColor: '#38bdf8', eyeColor: '#ffffff', hat: false, desc: 'Modrý bleskový Dino plný energie' },
+            { id: 'sarissky', name: 'Šarišský Ohnivák', price: 120, bodyColor: '#ef4444', eyeColor: '#fef08a', hat: false, desc: 'Ohnivý špeciál pre pravých borcov' },
+            { id: 'rainbow_dino', name: '🌈 Rainbow Dino', price: 180, bodyColor: '#f43f5e', eyeColor: '#ffffff', hat: false, rainbow: true, desc: 'Žiarivý dúhový Dino, ktorý mení farby za behu' }
+        ];
+
+        const MAPS = [
+            { id: 'pustatina', name: '🌵 Pustatina (Pust)', price: 0, desc: 'Teplá oranžová púšť s vrstvenými horami, slnkom a kaktusmi' },
+            { id: 'zima', name: '❄️ Zima / Zasnežený Chotár', price: 60, desc: 'Biely sneh, čierno-biele horské štíty a horské stromčeky' },
+            { id: 'dzungla', name: '🌴 Východná Džungľa', price: 90, desc: 'Prales s lišajníkmi, pixel mačkami, gepardmi a papagájmi' },
+            { id: 'dzedzina', name: '🏡 Zemplínska Dzedzina', price: 120, desc: 'Dedinská ulica, domy v pozadí, dedinčania a sliepky' },
+            { id: 'rainbow_road', name: '🌈 LEGENDARY: Rainbow Road', price: 250, desc: 'Legendárna dúhová dráha vo vesmíre so žiarivými farbami a hviezdami' }
+        ];
+
+        const FINDS_CATALOG = [
+            { id: 'saris_10', name: 'Šariš 10° fľaška', icon: '🍺', rarity: 'Common', badgeClass: 'r-common', bonusCoins: 2 },
+            { id: 'pirohy', name: 'Bryndzové pirohy z misky', icon: '🥟', rarity: 'Common', badgeClass: 'r-common', bonusCoins: 2 },
+            { id: 'zemplinsky_rozok', name: 'Zemplínsky čerstvý rožok', icon: '🥖', rarity: 'Common', badgeClass: 'r-common', bonusCoins: 2 },
+            { id: 'lesna_jahoda', name: 'Lesná jahoda z čerešňa', icon: '🍓', rarity: 'Common', badgeClass: 'r-common', bonusCoins: 2 },
+            { id: 'spissky_parok', name: 'Spišský párok na zahriatie', icon: '🌭', rarity: 'Common', badgeClass: 'r-common', bonusCoins: 2 },
+            { id: 'kofola_zo_stanku', name: 'Točená kofola zo stánku', icon: '🥤', rarity: 'Common', badgeClass: 'r-common', bonusCoins: 2 },
+
+            { id: 'saris_12', name: 'Šariš 12° plechovica', icon: '🍻', rarity: 'Uncommon', badgeClass: 'r-uncommon', bonusCoins: 4 },
+            { id: 'halusky', name: 'Miska halušiek so slaninou', icon: '🥔', rarity: 'Uncommon', badgeClass: 'r-uncommon', bonusCoins: 4 },
+            { id: 'hurka_z_klobasovky', name: 'Domáca hurka z klobásovky', icon: '🥩', rarity: 'Uncommon', badgeClass: 'r-uncommon', bonusCoins: 4 },
+            { id: 'kosicky_kolac', name: 'Košický makový závin', icon: '🥐', rarity: 'Uncommon', badgeClass: 'r-uncommon', bonusCoins: 4 },
+            { id: 'tatransky_caj', name: 'Tatranský čaj v termoske', icon: '🫖', rarity: 'Uncommon', badgeClass: 'r-uncommon', bonusCoins: 4 },
+            { id: 'hrncok_medu', name: 'Horský med spod Vihorlatu', icon: '🍯', rarity: 'Uncommon', badgeClass: 'r-uncommon', bonusCoins: 4 },
+
+            { id: 'vodka_z_pola', name: 'Domáca vodka zo sklepu', icon: '🥃', rarity: 'Rare', badgeClass: 'r-rare', bonusCoins: 7 },
+            { id: 'borovicka_spisska', name: 'Spišská borovička na zohriatie', icon: '🍶', rarity: 'Rare', badgeClass: 'r-rare', bonusCoins: 7 },
+            { id: 'slivovica_zemplin', name: 'Zemplínska slivovica z dubáka', icon: '🫗', rarity: 'Rare', badgeClass: 'r-rare', bonusCoins: 7 },
+            { id: 'bardejovsky_medovnik', name: 'Bardejovský medovníkový erb', icon: '🍪', rarity: 'Rare', badgeClass: 'r-rare', bonusCoins: 7 },
+            { id: 'ostiepok_z_koliby', name: 'Údený oštiepok z koliby', icon: '🧀', rarity: 'Rare', badgeClass: 'r-rare', bonusCoins: 7 },
+            { id: 'fujara_zo_senca', name: 'Vyrezávaná píšťalka z poľany', icon: '🪈', rarity: 'Rare', badgeClass: 'r-rare', bonusCoins: 7 },
+
+            { id: 'jozo_zo_sklepu', name: 'Jožo zo sklepu s dobrou náladou', icon: '🧔‍♂️', rarity: 'Epic', badgeClass: 'r-epic', bonusCoins: 12 },
+            { id: 'saris_hrad_kluc', name: 'Kľúč od Šarišského hradu', icon: '🗝️', rarity: 'Epic', badgeClass: 'r-epic', bonusCoins: 12 },
+            { id: 'sirava_poklad', name: 'Potopený poklad zo Šíravy', icon: '💎', rarity: 'Epic', badgeClass: 'r-epic', bonusCoins: 12 },
+            { id: 'krosno_tkanina', name: 'Tradičná východniarska krosna', icon: '🧶', rarity: 'Epic', badgeClass: 'r-epic', bonusCoins: 12 },
+            { id: 'spissky_hrad_dukat', name: 'Strieborný groš spod Spišského hradu', icon: '🪙', rarity: 'Epic', badgeClass: 'r-epic', bonusCoins: 12 },
+
+            { id: 'farar_s_pozehnanim', name: 'Farár s východniarskym požehnaním', icon: '✝️', rarity: 'Super Rare', badgeClass: 'r-super-rare', bonusCoins: 18 },
+            { id: 'morskie_oko_perla', name: 'Priezračná kvapka z Morského oka', icon: '💧', rarity: 'Super Rare', badgeClass: 'r-super-rare', bonusCoins: 18 },
+            { id: 'tokajsky_archiv', name: 'Archívny tokajský nektár z pivnice', icon: '🍷', rarity: 'Super Rare', badgeClass: 'r-super-rare', bonusCoins: 18 },
+
+            { id: 'zlaty_saris_korbel', name: 'Zlatý krígeľ kráľa Šariša', icon: '🏆', rarity: 'Extra Rare', badgeClass: 'r-extra-rare', bonusCoins: 30 },
+            { id: 'zbojnicky_valaskovy_poklad', name: 'Zbojnícka valaška so zafírom', icon: '🪓', rarity: 'Extra Rare', badgeClass: 'r-extra-rare', bonusCoins: 30 },
+            { id: 'svaty_gral_vychodu', name: 'Legendárny poklad z Tatier a Zemplína', icon: '👑', rarity: 'Extra Rare', badgeClass: 'r-extra-rare', bonusCoins: 30 },
+            { id: 'gazdovsky_diamant_kosice', name: 'Dóm sv. Alžbety – žiarivý drahokam', icon: '💠', rarity: 'Extra Rare', badgeClass: 'r-extra-rare', bonusCoins: 30 }
+        ];
+
+        // --- Audio Synthesizer (Web Audio API) ---
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                const now = ctx.currentTime;
+
+                if (type === 'jump') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(460, now + 0.12);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } else if (type === 'collect') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.setValueAtTime(600, now + 0.08);
+                    osc.frequency.setValueAtTime(850, now + 0.16);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'boost') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(750, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'hit') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.exponentialRampToValueAtTime(40, now + 0.25);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {}
+        }
+
+        // --- Active State Variables ---
+        let soundEnabled = safeGet('dino_sound', 'true') === 'true';
+        let currentUser = safeGet('dino_active_user', '');
+        let isAdminMode = false;
+
+        let bestScore = 0;
+        let dzedovePenezi = 0;
+        let ownedSkins = ['klasik'];
+        let equippedSkin = 'klasik';
+        let ownedMaps = ['pustatina'];
+        let equippedMap = 'pustatina';
+        let unlockedFinds = [];
+
+        function loadProfileData() {
+            if (currentUser) {
+                const accounts = JSON.parse(safeGet('dino_accounts', '{}'));
+                const acc = accounts[currentUser] || {};
+                bestScore = Number(acc.bestScore || 0);
+                dzedovePenezi = Number(acc.coins !== undefined ? acc.coins : 0);
+                ownedSkins = acc.ownedSkins || ['klasik'];
+                equippedSkin = acc.equippedSkin || 'klasik';
+                ownedMaps = acc.ownedMaps || ['pustatina'];
+                equippedMap = acc.equippedMap || 'pustatina';
+                unlockedFinds = acc.unlockedFinds || [];
+            } else {
+                bestScore = Number(safeGet('dino_guest_best', '0'));
+                dzedovePenezi = Number(safeGet('dino_guest_coins', '0'));
+                ownedSkins = JSON.parse(safeGet('dino_guest_skins', '["klasik"]'));
+                equippedSkin = safeGet('dino_guest_eq_skin', 'klasik');
+                ownedMaps = JSON.parse(safeGet('dino_guest_maps', '["pustatina"]'));
+                equippedMap = safeGet('dino_guest_eq_map', 'pustatina');
+                unlockedFinds = JSON.parse(safeGet('dino_guest_finds', '[]'));
+            }
+        }
+
+        function saveData() {
+            safeSet('dino_sound', String(soundEnabled));
+            safeSet('dino_active_user', currentUser);
+
+            if (currentUser) {
+                const accounts = JSON.parse(safeGet('dino_accounts', '{}'));
+                if (accounts[currentUser]) {
+                    if (!isAdminMode) {
+                        accounts[currentUser].bestScore = Math.max(accounts[currentUser].bestScore || 0, Math.floor(bestScore));
+                    }
+                    accounts[currentUser].coins = dzedovePenezi;
+                    accounts[currentUser].ownedSkins = ownedSkins;
+                    accounts[currentUser].equippedSkin = equippedSkin;
+                    accounts[currentUser].ownedMaps = ownedMaps;
+                    accounts[currentUser].equippedMap = equippedMap;
+                    accounts[currentUser].unlockedFinds = unlockedFinds;
+                    safeSet('dino_accounts', JSON.stringify(accounts));
+                }
+            } else {
+                safeSet('dino_guest_best', String(Math.floor(bestScore)));
+                safeSet('dino_guest_coins', String(dzedovePenezi));
+                safeSet('dino_guest_skins', JSON.stringify(ownedSkins));
+                safeSet('dino_guest_eq_skin', equippedSkin);
+                safeSet('dino_guest_maps', JSON.stringify(ownedMaps));
+                safeSet('dino_guest_eq_map', equippedMap);
+                safeSet('dino_guest_finds', JSON.stringify(unlockedFinds));
+            }
+        }
+
+        // --- Core Engine & Canvas Constants ---
+        const CANVAS_W = 900;
+        const CANVAS_H = 360;
+        const GROUND_Y = 290;
+
+        let gameRunning = false;
+        let gamePaused = false;
+        let gameOver = false;
+        let score = 0;
+        let runCoinsEarned = 0;
+        let lastCoinMilestone = 0;
+        let elapsedMs = 0;
+        let lastTime = 0;
+        let nextFindScoreThreshold = 70;
+
+        let isNight = false;
+        let nightAlpha = 0;
+        let sunY = 75;
+        let sunsetAlpha = 0;
+        let isRaining = false;
+        let rainIntensity = 0;
+        let weatherTimer = 0;
+        let rainTimer = 0;
+        let nextRainInterval = 45000 + Math.random() * 45000;
+        let rainDuration = 30000 + Math.random() * 20000;
+        let cloudCover = 0;
+        let clouds = [
+            { x: -160, y: 38, w: 130, speed: 0.45 },
+            { x: -380, y: 55, w: 165, speed: 0.35 },
+            { x: -620, y: 32, w: 145, speed: 0.50 },
+            { x: -850, y: 48, w: 175, speed: 0.40 }
+        ];
+        let raindrops = [];
+        let snowflakes = [];
+        let stars = Array.from({ length: 28 }, (_, i) => ({
+            x: (i * 137) % CANVAS_W,
+            y: 18 + ((i * 53) % 120),
+            size: (i % 2 === 0) ? 2 : 3
+        }));
+
+        let boostActive = false;
+        let boostTimeLeft = 0;
+        let nextBoostSpawnTime = 20000 + Math.random() * 15000;
+
+        const dino = {
+            x: 80,
+            y: GROUND_Y - 46,
+            w: 44,
+            h: 46,
+            vy: 0,
+            gravity: 0.65,
+            jumpPower: -13.2,
+            isGrounded: true,
+            isDucking: false,
+            legTimer: 0
+        };
+
+        let obstacles = [];
+        let obstacleSpawnTimer = 0;
+        let itemCollectibles = [];
+        let toastTimeout = null;
+
+        function showToast(text) {
+            const el = document.getElementById('toastBanner');
+            if (!el) return;
+            el.textContent = text;
+            el.classList.add('show');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                el.classList.remove('show');
+            }, 3400);
+        }
+
+        function formatTime(ms) {
+            const totalSec = Math.floor(ms / 1000);
+            const mins = String(Math.floor(totalSec / 60)).padStart(2, '0');
+            const secs = String(totalSec % 60).padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
+        function updateHUD() {
+            const userEl = document.getElementById('userBadge');
+            if (userEl) {
+                userEl.textContent = isAdminMode ? 'Admin' : (currentUser || 'Host');
+                const parentStat = document.getElementById('hudUser');
+                if (parentStat) {
+                    parentStat.className = isAdminMode
+                        ? 'bg-red-500/20 border border-red-500/60 text-red-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold shadow-md animate-pulse'
+                        : 'bg-[#0d1117] border border-purple-500/30 text-purple-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold';
+                }
+            }
+
+            document.getElementById('scoreVal').textContent = Math.floor(score);
+            document.getElementById('coinsVal').textContent = dzedovePenezi;
+            document.getElementById('shopCoinsVal').textContent = dzedovePenezi;
+            document.getElementById('timeVal').textContent = formatTime(elapsedMs);
+            document.getElementById('bestVal').textContent = Math.floor(bestScore);
+
+            const wBadge = document.getElementById('weatherBadge');
+            if (wBadge) {
+                if (isRaining && rainIntensity > 0.3) {
+                    wBadge.textContent = isNight ? '🌧️ NOC + DÁŽĎ' : '🌧️ DÁŽĎ';
+                } else if (isRaining) {
+                    wBadge.textContent = '☁️ MRAKY';
+                } else if (sunsetAlpha > 0.25) {
+                    wBadge.textContent = isNight ? '🌅 VÝCHOD' : '🌇 ZÁPAD';
+                } else {
+                    wBadge.textContent = isNight ? '🌙 NOC' : '☀️ DEŇ';
+                }
+            }
+
+            const btnLogout = document.getElementById('btnLogout');
+            if (btnLogout) {
+                btnLogout.style.display = currentUser ? 'inline-block' : 'none';
+            }
+        }
+
+        // --- View Switching ---
+        function switchView(target) {
+            const panels = ['viewHra', 'viewShop', 'viewFinds', 'viewAccount', 'viewLeaderboard'];
+            const btns = ['btnNavHra', 'btnNavShop', 'btnNavFinds', 'btnNavAccount', 'btnNavBoard'];
+
+            panels.forEach(id => document.getElementById(id)?.classList.add('hidden'));
+            btns.forEach(id => {
+                const b = document.getElementById(id);
+                if (b) {
+                    b.className = 'nav-btn bg-[#21262d] border-[#30363d] text-gray-300 border px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all hover:border-amber-400 hover:text-amber-400';
+                }
+            });
+
+            const activeBtn = (id) => {
+                const b = document.getElementById(id);
+                if (b) {
+                    b.className = 'nav-btn bg-amber-500/15 border-amber-500 text-amber-400 border px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-1.5 transition-all hover:border-amber-400';
+                }
+            };
+
+            if (target === 'hra') {
+                document.getElementById('viewHra')?.classList.remove('hidden');
+                activeBtn('btnNavHra');
+            } else if (target === 'shop') {
+                if (gameRunning && !gamePaused && !gameOver) togglePause();
+                document.getElementById('viewShop')?.classList.remove('hidden');
+                activeBtn('btnNavShop');
+                renderShop();
+            } else if (target === 'finds') {
+                if (gameRunning && !gamePaused && !gameOver) togglePause();
+                document.getElementById('viewFinds')?.classList.remove('hidden');
+                activeBtn('btnNavFinds');
+                renderFinds();
+            } else if (target === 'account') {
+                if (gameRunning && !gamePaused && !gameOver) togglePause();
+                document.getElementById('viewAccount')?.classList.remove('hidden');
+                activeBtn('btnNavAccount');
+                const msgEl = document.getElementById('accountMsg');
+                if (msgEl) {
+                    msgEl.textContent = currentUser ? `Si prihlásený ako: ${currentUser}` : 'Momentálne hráš ako Host (bez uloženia do rebríčka).';
+                }
+            } else if (target === 'board') {
+                if (gameRunning && !gamePaused && !gameOver) togglePause();
+                document.getElementById('viewLeaderboard')?.classList.remove('hidden');
+                activeBtn('btnNavBoard');
+                fetchLeaderboard();
+            }
+        }
+
+        // --- Shop UI Renderer ---
+        function renderShop() {
+            updateHUD();
+
+            const skinGrid = document.getElementById('gridDinoSkins');
+            if (skinGrid) {
+                skinGrid.innerHTML = '';
+                SKINS.forEach(skin => {
+                    const owned = ownedSkins.includes(skin.id);
+                    const equipped = equippedSkin === skin.id;
+                    const card = document.createElement('div');
+                    card.className = `bg-[#161b22] border rounded-xl p-4 flex flex-col gap-2.5 transition-all ${equipped ? 'border-emerald-500/80 bg-emerald-500/5' : 'border-[#30363d]'}`;
+
+                    let btnHtml = '';
+                    if (equipped) {
+                        btnHtml = `<button type="button" class="w-full mt-auto py-2 rounded-lg bg-emerald-600 text-white font-extrabold text-xs cursor-default">✅ Nasadený</button>`;
+                    } else if (owned) {
+                        btnHtml = `<button type="button" class="w-full mt-auto py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs" data-equip-skin="${skin.id}">Nasadiť skin</button>`;
+                    } else {
+                        const canAfford = dzedovePenezi >= skin.price;
+                        btnHtml = `<button type="button" class="w-full mt-auto py-2 rounded-lg font-extrabold text-xs ${canAfford ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}" data-buy-skin="${skin.id}" ${canAfford ? '' : 'disabled'}>Kúpiť za 🪙 ${skin.price}</button>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="font-extrabold text-sm text-gray-100 flex items-center gap-2">
+                            <span class="w-3.5 h-3.5 rounded-md inline-block shadow-sm" style="background:${skin.bodyColor};"></span> ${skin.name}
+                        </div>
+                        <div class="text-xs text-gray-400 leading-snug">${skin.desc}</div>
+                        ${btnHtml}
+                    `;
+                    skinGrid.appendChild(card);
+                });
+
+                skinGrid.querySelectorAll('[data-buy-skin]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.getAttribute('data-buy-skin');
+                        const skin = SKINS.find(s => s.id === id);
+                        if (skin && dzedovePenezi >= skin.price && !ownedSkins.includes(id)) {
+                            dzedovePenezi -= skin.price;
+                            ownedSkins.push(id);
+                            equippedSkin = id;
+                            saveData();
+                            playSound('collect');
+                            renderShop();
+                            draw();
+                        }
+                    });
+                });
+
+                skinGrid.querySelectorAll('[data-equip-skin]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        equippedSkin = btn.getAttribute('data-equip-skin');
+                        saveData();
+                        playSound('jump');
+                        renderShop();
+                        draw();
+                    });
+                });
+            }
+
+            const mapGrid = document.getElementById('gridMapSkins');
+            if (mapGrid) {
+                mapGrid.innerHTML = '';
+                MAPS.forEach(map => {
+                    const owned = ownedMaps.includes(map.id);
+                    const equipped = equippedMap === map.id;
+                    const card = document.createElement('div');
+                    card.className = `bg-[#161b22] border rounded-xl p-4 flex flex-col gap-2.5 transition-all ${equipped ? 'border-emerald-500/80 bg-emerald-500/5' : 'border-[#30363d]'}`;
+
+                    let btnHtml = '';
+                    if (equipped) {
+                        btnHtml = `<button type="button" class="w-full mt-auto py-2 rounded-lg bg-emerald-600 text-white font-extrabold text-xs cursor-default">✅ Aktívna mapa</button>`;
+                    } else if (owned) {
+                        btnHtml = `<button type="button" class="w-full mt-auto py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs" data-equip-map="${map.id}">Vybrať mapu</button>`;
+                    } else {
+                        const canAfford = dzedovePenezi >= map.price;
+                        btnHtml = `<button type="button" class="w-full mt-auto py-2 rounded-lg font-extrabold text-xs ${canAfford ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}" data-buy-map="${map.id}" ${canAfford ? '' : 'disabled'}>Kúpiť za 🪙 ${map.price}</button>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="font-extrabold text-sm text-gray-100">${map.name}</div>
+                        <div class="text-xs text-gray-400 leading-snug">${map.desc}</div>
+                        ${btnHtml}
+                    `;
+                    mapGrid.appendChild(card);
+                });
+
+                mapGrid.querySelectorAll('[data-buy-map]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.getAttribute('data-buy-map');
+                        const map = MAPS.find(m => m.id === id);
+                        if (map && dzedovePenezi >= map.price && !ownedMaps.includes(id)) {
+                            dzedovePenezi -= map.price;
+                            ownedMaps.push(id);
+                            equippedMap = id;
+                            saveData();
+                            playSound('collect');
+                            renderShop();
+                            draw();
+                        }
+                    });
+                });
+
+                mapGrid.querySelectorAll('[data-equip-map]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        equippedMap = btn.getAttribute('data-equip-map');
+                        saveData();
+                        playSound('jump');
+                        renderShop();
+                        draw();
+                    });
+                });
+            }
+        }
+
+        // --- Finds Renderer ---
+        function renderFinds() {
+            const listEl = document.getElementById('listFinds');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            FINDS_CATALOG.forEach(item => {
+                const found = unlockedFinds.includes(item.id);
+                const row = document.createElement('div');
+                row.className = `bg-[#161b22] border border-[#30363d] rounded-xl p-3 flex items-center justify-between gap-3 ${found ? '' : 'opacity-45 grayscale'}`;
+                row.innerHTML = `
+                    <div class="font-bold text-xs text-gray-200 flex items-center gap-2">
+                        <span class="text-lg">${found ? item.icon : '❓'}</span>
+                        <span>${found ? item.name : 'Neobjavený nález'}</span>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <span class="text-xs font-black text-amber-300">+🪙 ${item.bonusCoins}</span>
+                        <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${item.badgeClass}">${item.rarity}</span>
+                    </div>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        // --- Auth & Leaderboard ---
+        function handleAccountAuth() {
+            const userInp = document.getElementById('inputUser');
+            const passInp = document.getElementById('inputPass');
+            const msgEl = document.getElementById('accountMsg');
+            const u = (userInp?.value || '').trim();
+            const p = (passInp?.value || '').trim();
+
+            if (u.length < 3) {
+                if (msgEl) msgEl.textContent = '❌ Meno musí mať aspoň 3 znaky!';
+                return;
+            }
+            if (p.length < 4 || !/\d/.test(p)) {
+                if (msgEl) msgEl.textContent = '❌ Heslo musí mať aspoň 4 znaky a 1 číslo!';
+                return;
+            }
+
+            const accounts = JSON.parse(safeGet('dino_accounts', '{}'));
+            if (accounts[u]) {
+                if (accounts[u].pass !== p) {
+                    if (msgEl) msgEl.textContent = '❌ Nesprávne heslo pre tento účet!';
+                    return;
+                }
+                currentUser = u;
+                loadProfileData();
+                saveData();
+                updateHUD();
+                if (msgEl) msgEl.textContent = `✅ Vitaj späť, ${u}! Tvoje skóre a peňeži sú načítané.`;
+            } else {
+                accounts[u] = {
+                    pass: p,
+                    bestScore: Math.floor(bestScore),
+                    coins: dzedovePenezi,
+                    ownedSkins: ownedSkins,
+                    equippedSkin: equippedSkin,
+                    ownedMaps: ownedMaps,
+                    equippedMap: equippedMap,
+                    unlockedFinds: unlockedFinds
+                };
+                safeSet('dino_accounts', JSON.stringify(accounts));
+                currentUser = u;
+                saveData();
+                updateHUD();
+                if (msgEl) msgEl.textContent = `✅ Nový účet ${u} vytvorený!`;
+            }
+            playSound('collect');
+        }
+
+        function handleLogout() {
+            saveData();
+            currentUser = '';
+            safeSet('dino_active_user', '');
+            bestScore = 0;
+            dzedovePenezi = 0;
+            ownedSkins = ['klasik'];
+            equippedSkin = 'klasik';
+            ownedMaps = ['pustatina'];
+            equippedMap = 'pustatina';
+            unlockedFinds = [];
+            saveData();
+            updateHUD();
+            const msgEl = document.getElementById('accountMsg');
+            if (msgEl) msgEl.textContent = '👋 Odhlásený. Rekord a peňeži boli pre Host vynulované.';
+            playSound('jump');
+        }
+
+        function fetchLeaderboard() {
+            const listEl = document.getElementById('leaderboardList');
+            if (!listEl) return;
+
+            const accounts = JSON.parse(safeGet('dino_accounts', '{}'));
+            const entries = Object.keys(accounts).map(name => ({
+                name,
+                score: Number(accounts[name].bestScore || 0)
+            }));
+
+            entries.sort((a, b) => b.score - a.score);
+            listEl.innerHTML = '';
+
+            if (entries.length === 0) {
+                listEl.innerHTML = '<div class="text-xs text-gray-400 text-center py-6">Zatiaľ tu nikto nie je. Prihlás sa a sprav prvý rekord!</div>';
+                return;
+            }
+
+            entries.slice(0, 10).forEach((entry, idx) => {
+                const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+                const isMe = currentUser && entry.name === currentUser;
+                const row = document.createElement('div');
+                row.className = `bg-[#161b22] border rounded-xl p-3 flex items-center justify-between text-xs font-bold ${isMe ? 'border-emerald-500/80 bg-emerald-500/10' : 'border-[#30363d]'}`;
+                row.innerHTML = `
+                    <div class="text-gray-200">${medal} ${entry.name} ${isMe ? '(Ty)' : ''}</div>
+                    <div class="text-amber-400 font-black">${entry.score} puntov</div>
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        // --- Core Engine Gameplay Loops ---
+        function startGame() {
+            getAudioContext();
+            gameRunning = true;
+            gamePaused = false;
+            gameOver = false;
+            score = 0;
+            runCoinsEarned = 0;
+            lastCoinMilestone = 0;
+            elapsedMs = 0;
+            nextFindScoreThreshold = 70 + Math.floor(Math.random() * 30);
+
+            isNight = false;
+            nightAlpha = 0;
+            sunY = 75;
+            sunsetAlpha = 0;
+            isRaining = false;
+            rainIntensity = 0;
+            cloudCover = 0;
+            weatherTimer = 0;
+            rainTimer = 0;
+            nextRainInterval = 45000 + Math.random() * 45000;
+            rainDuration = 30000 + Math.random() * 20000;
+            clouds.forEach((c, idx) => { c.x = -180 - idx * 240; });
+            raindrops = [];
+            snowflakes = [];
+
+            boostActive = false;
+            boostTimeLeft = 0;
+            nextBoostSpawnTime = 20000 + Math.random() * 15000;
+
+            dino.y = GROUND_Y - 46;
+            dino.h = 46;
+            dino.vy = 0;
+            dino.isGrounded = true;
+            dino.isDucking = false;
+
+            obstacles = [];
+            obstacleSpawnTimer = 0;
+            itemCollectibles = [];
+
+            document.getElementById('startOverlay')?.classList.add('hidden');
+            document.getElementById('pauseOverlay')?.classList.add('hidden');
+            document.getElementById('gameOverOverlay')?.classList.add('hidden');
+
+            updateHUD();
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function togglePause() {
+            if (!gameRunning || gameOver) return;
+            gamePaused = !gamePaused;
+            const pOverlay = document.getElementById('pauseOverlay');
+            if (gamePaused) {
+                pOverlay?.classList.remove('hidden');
+            } else {
+                pOverlay?.classList.add('hidden');
+                lastTime = performance.now();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function jump() {
+            if (!gameRunning || gamePaused || gameOver) return;
+            if (dino.isGrounded) {
+                dino.vy = dino.jumpPower;
+                dino.isGrounded = false;
+                dino.isDucking = false;
+                dino.h = 46;
+                playSound('jump');
+            }
+        }
+
+        function setDuck(ducking) {
+            if (!gameRunning || gamePaused || gameOver) return;
+            dino.isDucking = ducking;
+            if (ducking) {
+                if (!dino.isGrounded) dino.vy += 4.5;
+                dino.h = 28;
+                if (dino.isGrounded) dino.y = GROUND_Y - 28;
+            } else {
+                dino.h = 46;
+                if (dino.isGrounded) dino.y = GROUND_Y - 46;
+            }
+        }
+
+        function spawnObstacle() {
+            const types = ['small1', 'large1', 'small3'];
+            if (score > 45) types.push('pterodactyl');
+            const type = types[Math.floor(Math.random() * types.length)];
+
+            let w = 26, h = 40, y = GROUND_Y - 40;
+            if (type === 'large1') {
+                w = 34; h = 54; y = GROUND_Y - 54;
+            } else if (type === 'small3') {
+                w = 72; h = 38; y = GROUND_Y - 38;
+            } else if (type === 'pterodactyl') {
+                w = 42; h = 28;
+                const heights = [GROUND_Y - 34, GROUND_Y - 62, GROUND_Y - 92];
+                y = heights[Math.floor(Math.random() * heights.length)];
+            }
+
+            obstacles.push({ x: CANVAS_W + 20, y, w, h, type, wingTimer: 0 });
+        }
+
+        function spawnGroundFind() {
+            const find = FINDS_CATALOG[Math.floor(Math.random() * FINDS_CATALOG.length)];
+            itemCollectibles.push({
+                x: CANVAS_W + 40,
+                y: GROUND_Y - 30,
+                w: 28,
+                h: 28,
+                find
+            });
+        }
+
+        function triggerGameOver(reason) {
+            gameRunning = false;
+            gameOver = true;
+            playSound('hit');
+
+            const finalScore = Math.floor(score);
+            if (!isAdminMode && finalScore > bestScore) {
+                bestScore = finalScore;
+            }
+            score = 0;
+            saveData();
+            updateHUD();
+
+            document.getElementById('deathReason').textContent = reason;
+            const adminNote = isAdminMode ? ' (Admin režim – nepočíta sa do rebríčka)' : '';
+            document.getElementById('runSummary').textContent = `Získal si ${finalScore} puntov a 🪙 ${runCoinsEarned} dzedovych penezí.${adminNote}`;
+            document.getElementById('gameOverOverlay')?.classList.remove('hidden');
+        }
+
+        function update(dt) {
+            elapsedMs += dt;
+
+            const baseSpeed = 6.2 + Math.min(8.5, score * 0.012);
+            const speed = boostActive ? baseSpeed * 1.45 : baseSpeed;
+
+            score += (dt / 1000) * (boostActive ? 7 : 3);
+            const currentMilestone = Math.floor(score / 10);
+            if (currentMilestone > lastCoinMilestone) {
+                const earned = currentMilestone - lastCoinMilestone;
+                lastCoinMilestone = currentMilestone;
+                dzedovePenezi += earned;
+                runCoinsEarned += earned;
+                saveData();
+            }
+
+            if (score >= nextFindScoreThreshold) {
+                spawnGroundFind();
+                nextFindScoreThreshold += 75 + Math.floor(Math.random() * 45);
+            }
+
+            // Weather Engine Cycle
+            weatherTimer += dt;
+            if (weatherTimer >= 60000) {
+                weatherTimer = 0;
+                isNight = !isNight;
+                showToast(isNight ? "🌇 Slnko zapadá... prichádza noc!" : "🌅 Slnko vychádza! Nový dzeň...");
+            }
+
+            if (!isNight) {
+                if (weatherTimer < 10000) {
+                    const p = weatherTimer / 10000;
+                    sunsetAlpha = Math.sin(p * Math.PI) * 0.75;
+                    sunY = 175 - p * 100;
+                    nightAlpha = (1 - p) * 0.85;
+                } else if (weatherTimer > 50000) {
+                    const p = (weatherTimer - 50000) / 10000;
+                    sunsetAlpha = Math.sin(p * Math.PI) * 0.85;
+                    sunY = 75 + p * 105;
+                    nightAlpha = p * 0.85;
+                } else {
+                    sunsetAlpha += (0 - sunsetAlpha) * 0.05;
+                    sunY += (75 - sunY) * 0.05;
+                    nightAlpha += (0 - nightAlpha) * 0.05;
+                }
+            } else {
+                if (weatherTimer > 52000) {
+                    const p = (weatherTimer - 52000) / 8000;
+                    sunsetAlpha = p * 0.45;
+                    nightAlpha = 0.85 - p * 0.25;
+                } else {
+                    sunsetAlpha += (0 - sunsetAlpha) * 0.05;
+                    nightAlpha += (0.85 - nightAlpha) * 0.05;
+                }
+                sunY = 190;
+            }
+
+            rainTimer += dt;
+            if (!isRaining && rainTimer >= nextRainInterval) {
+                isRaining = true;
+                rainTimer = 0;
+                rainDuration = 30000 + Math.random() * 20000;
+                showToast("☁️ Zbierajú še mraky... bude oršac!");
+            } else if (isRaining && rainTimer >= rainDuration) {
+                isRaining = false;
+                rainTimer = 0;
+                nextRainInterval = 45000 + Math.random() * 45000;
+                showToast("🌤️ Mraky odchádzajú, prestáva pršať!");
+            }
+
+            const targetCloud = isRaining ? 1 : 0;
+            cloudCover += (targetCloud - cloudCover) * 0.015;
+
+            clouds.forEach((c, idx) => {
+                if (cloudCover > 0.05) {
+                    const targetX = 80 + idx * 210 + Math.sin(elapsedMs * 0.0005 + idx) * 35;
+                    c.x += (targetX - c.x) * 0.012;
+                } else {
+                    c.x += c.speed * 2.5;
+                    if (c.x > CANVAS_W + 200) c.x = -220 - idx * 180;
+                }
+            });
+
+            const targetRain = (isRaining && cloudCover > 0.45) ? 1 : 0;
+            rainIntensity += (targetRain - rainIntensity) * 0.03;
+
+            if (rainIntensity > 0.05) {
+                const desiredDrops = Math.floor(85 * rainIntensity);
+                while (raindrops.length < desiredDrops) {
+                    const sourceCloud = clouds[Math.floor(Math.random() * clouds.length)];
+                    raindrops.push({
+                        x: Math.max(0, Math.min(CANVAS_W, sourceCloud.x + Math.random() * sourceCloud.w)),
+                        y: sourceCloud.y + 24 + Math.random() * 20,
+                        len: 10 + Math.floor(Math.random() * 8),
+                        speed: 9 + Math.random() * 5
+                    });
+                }
+                for (let i = raindrops.length - 1; i >= 0; i--) {
+                    const r = raindrops[i];
+                    r.x -= 2;
+                    r.y += r.speed;
+                    if (r.y > GROUND_Y) {
+                        if (rainIntensity > 0.15) {
+                            const sourceCloud = clouds[Math.floor(Math.random() * clouds.length)];
+                            r.x = Math.max(0, Math.min(CANVAS_W, sourceCloud.x + Math.random() * sourceCloud.w));
+                            r.y = sourceCloud.y + 26;
+                        } else {
+                            raindrops.splice(i, 1);
+                        }
+                    }
+                }
+            } else {
+                raindrops = [];
+            }
+
+            if (equippedMap === 'zima') {
+                while (snowflakes.length < 35) {
+                    snowflakes.push({
+                        x: Math.random() * CANVAS_W,
+                        y: Math.random() * GROUND_Y,
+                        speed: 1.2 + Math.random() * 1.5
+                    });
+                }
+                for (const sf of snowflakes) {
+                    sf.x -= 0.8;
+                    sf.y += sf.speed;
+                    if (sf.y > GROUND_Y) { sf.y = 0; sf.x = Math.random() * CANVAS_W; }
+                    if (sf.x < 0) sf.x = CANVAS_W;
+                }
+            }
+
+            // Turbo Boost Handler
+            if (boostActive) {
+                boostTimeLeft -= dt;
+                if (boostTimeLeft <= 0) {
+                    boostActive = false;
+                    showToast("⚡ Šariš turbo vyprchalo!");
+                }
+            } else if (elapsedMs >= nextBoostSpawnTime) {
+                boostActive = true;
+                boostTimeLeft = 6000;
+                nextBoostSpawnTime = elapsedMs + 25000 + Math.random() * 20000;
+                playSound('boost');
+                showToast("⚡ ŠARIŠ TURBO! Nezničiteľný šprint!");
+            }
+
+            // Dino Physics
+            dino.legTimer += dt;
+            if (!dino.isGrounded) {
+                dino.vy += dino.gravity;
+                dino.y += dino.vy;
+                const targetY = GROUND_Y - dino.h;
+                if (dino.y >= targetY) {
+                    dino.y = targetY;
+                    dino.vy = 0;
+                    dino.isGrounded = true;
+                }
+            }
+
+            // Obstacles & Collision Check
+            obstacleSpawnTimer -= dt;
+            if (obstacleSpawnTimer <= 0) {
+                spawnObstacle();
+                const minGap = Math.max(680, 1350 - score * 1.8);
+                obstacleSpawnTimer = minGap + Math.random() * 650;
+            }
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obs = obstacles[i];
+                obs.x -= speed;
+                obs.wingTimer += dt;
+
+                const pad = 6;
+                if (
+                    dino.x + pad < obs.x + obs.w - pad &&
+                    dino.x + dino.w - pad > obs.x + pad &&
+                    dino.y + pad < obs.y + obs.h - pad &&
+                    dino.y + dino.h - pad > obs.y + pad
+                ) {
+                    if (boostActive) {
+                        obstacles.splice(i, 1);
+                        playSound('jump');
+                        continue;
+                    } else {
+                        triggerGameOver("Zrazil si sa s prekážkou na trati!");
+                        return;
+                    }
+                }
+
+                if (obs.x + obs.w < -40) obstacles.splice(i, 1);
+            }
+
+            // Collectibles Collision Check
+            for (let i = itemCollectibles.length - 1; i >= 0; i--) {
+                const item = itemCollectibles[i];
+                item.x -= speed;
+
+                if (
+                    dino.x < item.x + item.w &&
+                    dino.x + dino.w > item.x &&
+                    dino.y < item.y + item.h &&
+                    dino.y + dino.h > item.y
+                ) {
+                    const f = item.find;
+                    dzedovePenezi += f.bonusCoins;
+                    runCoinsEarned += f.bonusCoins;
+                    if (!unlockedFinds.includes(f.id)) unlockedFinds.push(f.id);
+                    saveData();
+                    playSound('collect');
+                    showToast(`🎒 Našiel si: ${f.icon} ${f.name} (+🪙 ${f.bonusCoins})`);
+                    itemCollectibles.splice(i, 1);
+                    continue;
+                }
+
+                if (item.x + item.w < -40) itemCollectibles.splice(i, 1);
+            }
+
+            updateHUD();
+        }
+
+        // --- Render Canvas Graphics ---
+        function draw() {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            const px = (x, y, w, h, color) => {
+                ctx.fillStyle = color;
+                ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+            };
+
+            // Sky Background Color according to Map
+            if (equippedMap === 'zima') {
+                px(0, 0, CANVAS_W, CANVAS_H, '#bae6fd');
+            } else if (equippedMap === 'dzungla') {
+                px(0, 0, CANVAS_W, CANVAS_H, '#bbf7d0');
+            } else if (equippedMap === 'dzedzina') {
+                px(0, 0, CANVAS_W, CANVAS_H, '#bae6fd');
+            } else if (equippedMap === 'rainbow_road') {
+                const skyGrad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+                skyGrad.addColorStop(0, '#090d16');
+                skyGrad.addColorStop(0.55, '#1e1b4b');
+                skyGrad.addColorStop(1, '#4c1d95');
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, CANVAS_W, GROUND_Y);
+
+                const rainbowBands = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#a855f7'];
+                rainbowBands.forEach((col, bIdx) => {
+                    const arcY = 120 + bIdx * 10 + Math.sin(elapsedMs * 0.002 + bIdx) * 4;
+                    ctx.fillStyle = col;
+                    ctx.fillRect(0, arcY, CANVAS_W, 8);
+                });
+
+                stars.forEach((st, idx) => {
+                    const twinkle = (Math.floor(elapsedMs / 250 + idx) % 2 === 0) ? '#ffffff' : '#fde047';
+                    px(st.x, st.y, st.size + 1, st.size + 1, twinkle);
+                });
+            } else {
+                px(0, 0, CANVAS_W, CANVAS_H, '#ffedd5');
+            }
+
+            // Sunrise & Sunset Glow
+            if (sunsetAlpha > 0.01) {
+                const grad = ctx.createLinearGradient(0, 40, 0, GROUND_Y);
+                grad.addColorStop(0, `rgba(249, 115, 22, ${sunsetAlpha * 0.45})`);
+                grad.addColorStop(0.5, `rgba(239, 68, 68, ${sunsetAlpha * 0.65})`);
+                grad.addColorStop(1, `rgba(251, 191, 36, ${sunsetAlpha * 0.85})`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, CANVAS_W, GROUND_Y);
+            }
+
+            // Night Atmosphere & Stars
+            if (nightAlpha > 0.01) {
+                ctx.fillStyle = `rgba(11, 15, 29, ${nightAlpha})`;
+                ctx.fillRect(0, 0, CANVAS_W, GROUND_Y);
+
+                if (nightAlpha > 0.35) {
+                    stars.forEach(st => {
+                        px(st.x, st.y, st.size, st.size, `rgba(254, 249, 195, ${nightAlpha})`);
+                    });
+                }
+            }
+
+            // Pixel-Art Sun & Moon
+            if (sunY < GROUND_Y - 10) {
+                const sx = 740;
+                const sy = Math.round(sunY);
+                const sunCore = sunsetAlpha > 0.25 ? '#fb7185' : '#facc15';
+                const sunRim = sunsetAlpha > 0.25 ? '#f97316' : '#fef08a';
+                px(sx + 8, sy, 24, 40, sunRim);
+                px(sx, sy + 8, 40, 24, sunRim);
+                px(sx + 4, sy + 4, 32, 32, sunCore);
+                px(sx + 10, sy + 10, 20, 20, '#fef9c3');
+            }
+
+            if (nightAlpha > 0.25) {
+                const mx = 140;
+                const my = 48;
+                px(mx + 6, my, 18, 28, '#fef08a');
+                px(mx, my + 6, 28, 16, '#fef08a');
+                px(mx + 14, my + 4, 14, 16, '#0b0f1d');
+            }
+
+            // Map Pixel Background Environment Layers
+            if (equippedMap === 'zima') {
+                const peaks = [
+                    { x: 0, w: 220, h: 148 },
+                    { x: 160, w: 260, h: 188 },
+                    { x: 370, w: 240, h: 144 },
+                    { x: 560, w: 280, h: 200 },
+                    { x: 770, w: 220, h: 156 }
+                ];
+                peaks.forEach(p => {
+                    const steps = 18;
+                    for (let s = 0; s < steps; s++) {
+                        const ratio = (s + 1) / steps;
+                        const rowH = Math.ceil(p.h / steps);
+                        const rowW = Math.round(p.w * ratio);
+                        const rowX = Math.round(p.x + (p.w - rowW) * 0.5);
+                        const rowY = Math.round(GROUND_Y - p.h + s * rowH);
+                        const isSnowCap = s < steps * 0.38 || (s < steps * 0.46 && (s % 2 === 0));
+                        px(rowX, rowY, rowW, rowH + 1, isSnowCap ? '#ffffff' : '#1e293b');
+                    }
+                });
+
+                px(0, GROUND_Y, CANVAS_W, CANVAS_H - GROUND_Y, '#ffffff');
+                px(0, GROUND_Y, CANVAS_W, 4, '#e2e8f0');
+
+            } else if (equippedMap === 'dzungla') {
+                for (let tx = 40; tx < CANVAS_W; tx += 155) {
+                    px(tx + 4, 72, 16, GROUND_Y - 72, '#451a03');
+                    px(tx + 8, 72, 6, GROUND_Y - 72, '#78350f');
+
+                    px(tx - 32, 64, 88, 28, '#14532d');
+                    px(tx - 20, 44, 64, 24, '#166534');
+                    px(tx - 8, 32, 40, 16, '#15803d');
+
+                    const lichenOffsets = [-24, -8, 12, 30, 44];
+                    lichenOffsets.forEach((ox, idx) => {
+                        const lLen = 28 + ((tx + idx * 17) % 36);
+                        for (let ly = 0; ly < lLen; ly += 6) {
+                            const shift = (ly % 12 === 0) ? 0 : 3;
+                            px(tx + ox + shift, 92 + ly, 4, 6, (ly % 12 === 0) ? '#65a30d' : '#84cc16');
+                        }
+                    });
+                }
+
+                px(0, GROUND_Y, CANVAS_W, CANVAS_H - GROUND_Y, '#365314');
+                px(0, GROUND_Y, CANVAS_W, 5, '#4d7c0f');
+
+            } else if (equippedMap === 'dzedzina') {
+                const houses = [
+                    { x: 36, w: 96, h: 64, wall: '#fef3c7', roof: '#b91c1c' },
+                    { x: 184, w: 112, h: 72, wall: '#fde68a', roof: '#991b1b' },
+                    { x: 348, w: 92, h: 60, wall: '#e0e7ff', roof: '#c2410c' },
+                    { x: 492, w: 116, h: 72, wall: '#ffedd5', roof: '#b91c1c' },
+                    { x: 660, w: 100, h: 68, wall: '#fef9c3', roof: '#7f1d1d' },
+                    { x: 800, w: 88, h: 62, wall: '#f3e8ff', roof: '#b45309' }
+                ];
+                houses.forEach(h => {
+                    const baseY = GROUND_Y - 12;
+                    px(h.x, baseY - h.h, h.w, h.h, h.wall);
+                    const roofSteps = 7;
+                    for (let r = 0; r < roofSteps; r++) {
+                        const rw = h.w + 12 - r * 14;
+                        if (rw > 8) px(h.x + (h.w - rw) * 0.5, baseY - h.h - (r + 1) * 5, rw, 5, h.roof);
+                    }
+                    px(h.x + 14, baseY - h.h + 16, 16, 16, '#0284c7');
+                    px(h.x + 16, baseY - h.h + 18, 12, 12, '#7dd3fc');
+                    px(h.x + h.w - 30, baseY - h.h + 16, 16, 16, '#0284c7');
+                    px(h.x + h.w - 28, baseY - h.h + 18, 12, 12, '#7dd3fc');
+                    px(h.x + Math.floor(h.w * 0.5) - 9, baseY - 30, 18, 30, '#78350f');
+                });
+
+                px(0, GROUND_Y - 14, CANVAS_W, 4, '#9ca3af');
+                px(0, GROUND_Y - 10, CANVAS_W, CANVAS_H - (GROUND_Y - 10), '#4b5563');
+
+            } else if (equippedMap === 'rainbow_road') {
+                const roadBands = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
+                const bandH = Math.ceil((CANVAS_H - GROUND_Y) / roadBands.length);
+                roadBands.forEach((col, idx) => {
+                    const shiftedIdx = (idx + Math.floor(elapsedMs / 180)) % roadBands.length;
+                    px(0, GROUND_Y + idx * bandH, CANVAS_W, bandH + 1, roadBands[shiftedIdx]);
+                });
+                for (let gx = 0; gx < CANVAS_W; gx += 48) {
+                    const moveX = (gx - Math.floor((elapsedMs * 0.25) % 48) + CANVAS_W) % CANVAS_W;
+                    px(moveX, GROUND_Y + 6, 18, 4, 'rgba(255, 255, 255, 0.75)');
+                }
+
+            } else {
+                const mesas = [
+                    { x: 60, w: 180, h: 84 },
+                    { x: 340, w: 220, h: 108 },
+                    { x: 650, w: 210, h: 120 }
+                ];
+                mesas.forEach(m => {
+                    const steps = 12;
+                    for (let s = 0; s < steps; s++) {
+                        const rw = Math.round(m.w * ((s + 1) / steps));
+                        const rh = Math.ceil(m.h / steps);
+                        px(m.x + (m.w - rw) * 0.5, GROUND_Y - m.h + s * rh, rw, rh + 1, 'rgba(251, 146, 60, 0.32)');
+                    }
+                });
+            }
+
+            // Drifting Clouds
+            if (cloudCover > 0.02) {
+                const cAlpha = Math.min(0.95, cloudCover);
+                clouds.forEach(c => {
+                    const cx = Math.round(c.x);
+                    const cy = Math.round(c.y);
+                    ctx.fillStyle = `rgba(71, 85, 105, ${cAlpha})`;
+                    ctx.fillRect(cx + 16, cy, c.w - 32, 12);
+                    ctx.fillRect(cx + 6, cy + 10, c.w - 12, 14);
+                    ctx.fillRect(cx, cy + 20, c.w, 12);
+                    ctx.fillStyle = `rgba(51, 65, 85, ${cAlpha})`;
+                    ctx.fillRect(cx + 4, cy + 26, c.w - 8, 6);
+                });
+            }
+
+            // Ground & Road Details
+            px(0, GROUND_Y, CANVAS_W, 2, equippedMap === 'zima' ? '#94a3b8' : (equippedMap === 'dzedzina' ? '#e5e7eb' : (equippedMap === 'rainbow_road' ? '#fef08a' : (nightAlpha > 0.5 ? '#64748b' : '#535353'))));
+
+            if (equippedMap === 'dzedzina') {
+                for (let i = 0; i < CANVAS_W; i += 70) {
+                    let offset = (i + Math.floor(score * 4)) % CANVAS_W;
+                    px(CANVAS_W - offset, GROUND_Y + 22, 34, 4, '#f3f4f6');
+                }
+            } else {
+                const dotCol = equippedMap === 'zima' ? '#cbd5e1' : (equippedMap === 'dzungla' ? '#84cc16' : (nightAlpha > 0.5 ? '#475569' : '#d97706'));
+                for (let i = 0; i < CANVAS_W; i += 45) {
+                    let offset = (i + Math.floor(score * 4)) % CANVAS_W;
+                    px(CANVAS_W - offset, GROUND_Y + 8, 4, 4, dotCol);
+                    px(CANVAS_W - offset + 15, GROUND_Y + 18, 6, 3, dotCol);
+                }
+            }
+
+            // Collectibles on ground
+            for (const item of itemCollectibles) {
+                ctx.font = '22px system-ui';
+                ctx.fillText(item.find.icon, item.x, item.y + 20);
+            }
+
+            // Obstacles Sprites Rendering
+            const drawPixelPine = (tx, ty, tw, th) => {
+                px(tx + tw * 0.36, ty + th * 0.72, tw * 0.28, th * 0.28, '#5c4033');
+                const tiers = 7;
+                for (let t = 0; t < tiers; t++) {
+                    const bw = Math.max(6, Math.round(tw * ((t + 1) / tiers)));
+                    const bh = Math.ceil((th * 0.75) / tiers);
+                    const bx = tx + (tw - bw) * 0.5;
+                    const by = ty + t * bh;
+                    px(bx, by, bw, bh, t < 2 ? '#ffffff' : '#14532d');
+                    if (t >= 2 && t % 2 === 1) {
+                        px(bx, by, 4, 3, '#ffffff');
+                        px(bx + bw - 4, by, 4, 3, '#ffffff');
+                    }
+                }
+            };
+
+            const drawPixelCat = (cx, cy, cw, ch, isDark) => {
+                const fur = isDark ? '#1e293b' : '#f97316';
+                const stripe = isDark ? '#334155' : '#c2410c';
+                px(cx + cw - 4, cy + 8, 4, 16, fur);
+                px(cx + cw - 2, cy + 4, 4, 6, stripe);
+                px(cx + 6, cy + 16, cw - 10, 14, fur);
+                px(cx + 10, cy + 16, 4, 6, stripe);
+                px(cx + 2, cy + 6, 12, 12, fur);
+                px(cx + 2, cy + 2, 3, 4, fur);
+                px(cx + 11, cy + 2, 3, 4, fur);
+                px(cx + 4, cy + 10, 2, 2, '#fef08a');
+                px(cx + 6, cy + 30, 4, ch - 30, fur);
+                px(cx + cw - 8, cy + 30, 4, ch - 30, fur);
+            };
+
+            const drawPixelCheetah = (gx, gy, gw, gh) => {
+                const coat = '#facc15';
+                const spot = '#1c1917';
+                px(gx + gw - 4, gy + 16, 6, 4, coat);
+                px(gx + gw, gy + 12, 4, 6, spot);
+                px(gx + 8, gy + 20, gw - 12, 16, coat);
+                px(gx + 12, gy + 23, 3, 3, spot);
+                px(gx + 18, gy + 27, 3, 3, spot);
+                px(gx + 22, gy + 22, 3, 3, spot);
+                px(gx + 2, gy + 10, 14, 12, coat);
+                px(gx + 3, gy + 7, 3, 3, coat);
+                px(gx + 11, gy + 7, 3, 3, coat);
+                px(gx + 4, gy + 14, 2, 3, spot);
+                px(gx + 8, gy + 36, 4, gh - 36, coat);
+                px(gx + gw - 10, gy + 36, 4, gh - 36, coat);
+            };
+
+            const drawPixelParrot = (pxX, pxY, pw, ph, timer) => {
+                const wingUp = Math.floor((timer || 0) / 140) % 2 === 0;
+                px(pxX + 8, pxY + 10, 22, 10, '#ef4444');
+                px(pxX + 30, pxY + 12, 12, 4, '#2563eb');
+                px(pxX + 32, pxY + 16, 10, 3, '#facc15');
+                px(pxX + 2, pxY + 11, 6, 6, '#facc15');
+                px(pxX + 10, pxY + 12, 2, 2, '#ffffff');
+                if (wingUp) {
+                    px(pxX + 14, pxY + 2, 10, 8, '#3b82f6');
+                    px(pxX + 16, pxY, 6, 4, '#facc15');
+                } else {
+                    px(pxX + 14, pxY + 18, 10, 8, '#3b82f6');
+                }
+            };
+
+            const drawPixelVillager = (vx, vy, vw, vh) => {
+                px(vx + 6, vy, 20, 4, '#1f2937');
+                px(vx + 10, vy - 4, 12, 4, '#1f2937');
+                px(vx + 10, vy + 4, 12, 12, '#fed7aa');
+                px(vx + 12, vy + 8, 2, 2, '#1f2937');
+                px(vx + 8, vy + 16, 16, 20, '#2563eb');
+                px(vx + 14, vy + 16, 4, 20, '#ffffff');
+                px(vx + 9, vy + 36, 5, vh - 36, '#1e293b');
+                px(vx + 18, vy + 36, 5, vh - 36, '#1e293b');
+            };
+
+            const drawPixelChicken = (cx, cy, cw, ch) => {
+                px(cx + 6, cy + 18, 16, 12, '#ffffff');
+                px(cx + 4, cy + 10, 8, 10, '#ffffff');
+                px(cx + 5, cy + 6, 6, 4, '#dc2626');
+                px(cx, cy + 13, 4, 4, '#f59e0b');
+                px(cx + 10, cy + 30, 2, ch - 30, '#f59e0b');
+                px(cx + 16, cy + 30, 2, ch - 30, '#f59e0b');
+            };
+
+            for (const obs of obstacles) {
+                if (equippedMap === 'zima') {
+                    if (obs.type === 'small1') drawPixelPine(obs.x, obs.y, obs.w, obs.h);
+                    else if (obs.type === 'large1') drawPixelPine(obs.x, obs.y, obs.w, obs.h);
+                    else if (obs.type === 'small3') {
+                        drawPixelPine(obs.x, obs.y + 4, 22, obs.h - 4);
+                        drawPixelPine(obs.x + 24, obs.y, 24, obs.h);
+                        drawPixelPine(obs.x + 50, obs.y + 6, 22, obs.h - 6);
+                    } else if (obs.type === 'pterodactyl') {
+                        px(obs.x + 10, obs.y + 6, 20, 18, '#f8fafc');
+                        px(obs.x + 12, obs.y + 10, 4, 4, '#facc15');
+                        px(obs.x + 22, obs.y + 10, 4, 4, '#facc15');
+                        px(obs.x + 2, obs.y + 10, 8, 6, '#cbd5e1');
+                        px(obs.x + 30, obs.y + 10, 8, 6, '#cbd5e1');
+                    }
+                } else if (equippedMap === 'dzungla') {
+                    if (obs.type === 'small1') drawPixelCat(obs.x, obs.y, obs.w, obs.h, false);
+                    else if (obs.type === 'large1') drawPixelCheetah(obs.x, obs.y, obs.w, obs.h);
+                    else if (obs.type === 'small3') {
+                        drawPixelCat(obs.x, obs.y + 4, 22, obs.h - 4, false);
+                        drawPixelCat(obs.x + 24, obs.y + 2, 22, obs.h - 2, true);
+                        drawPixelCat(obs.x + 48, obs.y + 4, 22, obs.h - 4, false);
+                    } else if (obs.type === 'pterodactyl') {
+                        drawPixelParrot(obs.x, obs.y, obs.w, obs.h, obs.wingTimer);
+                    }
+                } else if (equippedMap === 'dzedzina') {
+                    if (obs.type === 'small1') drawPixelChicken(obs.x, obs.y, obs.w, obs.h);
+                    else if (obs.type === 'large1') drawPixelVillager(obs.x, obs.y, obs.w, obs.h);
+                    else if (obs.type === 'small3') {
+                        drawPixelChicken(obs.x, obs.y + 4, 22, obs.h - 4);
+                        drawPixelChicken(obs.x + 24, obs.y + 4, 22, obs.h - 4);
+                        drawPixelChicken(obs.x + 48, obs.y + 4, 22, obs.h - 4);
+                    } else if (obs.type === 'pterodactyl') {
+                        drawPixelChicken(obs.x + 8, obs.y + 2, 24, 28);
+                    }
+                } else if (equippedMap === 'rainbow_road') {
+                    const prismColors = ['#f43f5e', '#f59e0b', '#10b981', '#06b6d4', '#a855f7'];
+                    const col = prismColors[Math.floor((obs.x + elapsedMs * 0.05) / 30) % prismColors.length];
+                    if (obs.type === 'pterodactyl') {
+                        px(obs.x + 6, obs.y + 8, obs.w - 12, 12, '#38bdf8');
+                        const flap = Math.floor((obs.wingTimer || 0) / 120) % 2 === 0;
+                        px(obs.x + 14, flap ? obs.y : obs.y + 16, 14, 10, '#f472b6');
+                    } else {
+                        px(obs.x + 4, obs.y, obs.w - 8, obs.h, col);
+                        px(obs.x + 8, obs.y + 4, obs.w - 16, obs.h - 8, '#fef08a');
+                    }
+                } else {
+                    ctx.fillStyle = nightAlpha > 0.5 ? '#94a3b8' : '#15803d';
+                    if (obs.type === 'small1') {
+                        ctx.fillRect(obs.x + 8, obs.y, 8, obs.h);
+                        ctx.fillRect(obs.x, obs.y + 10, 24, 6);
+                    } else if (obs.type === 'large1') {
+                        ctx.fillRect(obs.x + 10, obs.y, 12, obs.h);
+                        ctx.fillRect(obs.x, obs.y + 14, 32, 8);
+                    } else if (obs.type === 'small3') {
+                        ctx.fillRect(obs.x + 4, obs.y, 8, obs.h);
+                        ctx.fillRect(obs.x + 28, obs.y + 6, 8, obs.h - 6);
+                        ctx.fillRect(obs.x + 52, obs.y + 2, 8, obs.h - 2);
+                        ctx.fillRect(obs.x, obs.y + 12, 60, 6);
+                    } else if (obs.type === 'pterodactyl') {
+                        ctx.fillStyle = '#64748b';
+                        ctx.fillRect(obs.x, obs.y + 10, obs.w, 10);
+                        const wingUp = Math.floor((obs.wingTimer || 0) / 150) % 2 === 0;
+                        px(obs.x + 16, wingUp ? obs.y - 6 : obs.y + 16, 12, wingUp ? 16 : 14, '#64748b');
+                    }
+                }
+            }
+
+            // Dino Character Sprite Drawing
+            const activeSkin = SKINS.find(s => s.id === equippedSkin) || SKINS[0];
+            const rainbowPalette = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#a855f7'];
+            const getDinoColor = (partOffset = 0) => {
+                if (activeSkin.rainbow) {
+                    const idx = (Math.floor(elapsedMs / 110) + partOffset) % rainbowPalette.length;
+                    return rainbowPalette[idx];
+                }
+                return activeSkin.bodyColor;
+            };
+            const dx = Math.round(dino.x);
+            const dy = Math.round(dino.y);
+
+            if (boostActive) {
+                px(dx - 6, dy - 6, dino.w + 12, dino.h + 12, 'rgba(250, 204, 21, 0.35)');
+            }
+
+            if (dino.isDucking) {
+                px(dx, dy + 6, 48, 16, getDinoColor(1));
+                px(dx + 32, dy + 2, 18, 14, getDinoColor(2));
+                px(dx + 42, dy + 5, 4, 4, activeSkin.eyeColor);
+            } else {
+                px(dx, dy + 18, 8, 14, getDinoColor(0));
+                px(dx + 8, dy + 14, 22, 22, getDinoColor(1));
+                px(dx + 20, dy, 22, 16, getDinoColor(2));
+                px(dx + 34, dy + 10, 10, 4, getDinoColor(3));
+                px(dx + 26, dy + 4, 4, 4, activeSkin.eyeColor);
+                px(dx + 30, dy + 20, 8, 4, getDinoColor(4));
+
+                if (activeSkin.hat) {
+                    px(dx + 18, dy - 4, 24, 4, '#ffffff');
+                    px(dx + 20, dy - 10, 18, 6, '#dc2626');
+                    px(dx + 16, dy - 12, 6, 6, '#ffffff');
+                }
+            }
+
+            // Animated Running Legs
+            const stepFrame = Math.floor(dino.legTimer / 110) % 2;
+            const legY = dy + dino.h - 10;
+            if (dino.isGrounded && gameRunning) {
+                if (stepFrame === 0) {
+                    px(dx + 12, legY, 6, 10, getDinoColor(3));
+                    px(dx + 24, legY, 6, 6, getDinoColor(4));
+                } else {
+                    px(dx + 12, legY, 6, 6, getDinoColor(3));
+                    px(dx + 24, legY, 6, 10, getDinoColor(4));
+                }
+            } else {
+                px(dx + 12, legY, 6, 10, getDinoColor(3));
+                px(dx + 24, legY, 6, 10, getDinoColor(4));
+            }
+
+            if (equippedMap === 'zima') {
+                snowflakes.forEach(sf => px(sf.x, sf.y, 3, 3, '#ffffff'));
+            }
+
+            if (raindrops.length > 0) {
+                for (const r of raindrops) px(r.x, r.y, 2, r.len, '#38bdf8');
+            }
+        }
+
+        function gameLoop(timestamp) {
+            if (!gameRunning || gamePaused || gameOver) return;
+            const dt = Math.min(50, timestamp - lastTime);
+            lastTime = timestamp;
+
+            update(dt);
+            draw();
+
+            if (gameRunning && !gamePaused && !gameOver) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // --- Event Handlers & Initialization ---
+        function initApp() {
+            loadProfileData();
+            updateHUD();
+
+            const zvukBtn = document.getElementById('btnNavZvuk');
+            if (zvukBtn) {
+                zvukBtn.textContent = soundEnabled ? '🔊 Zvuk: ZAP' : '🔇 Zvuk: VYP';
+                zvukBtn.addEventListener('click', () => {
+                    soundEnabled = !soundEnabled;
+                    zvukBtn.textContent = soundEnabled ? '🔊 Zvuk: ZAP' : '🔇 Zvuk: VYP';
+                    saveData();
+                    if (soundEnabled) playSound('jump');
+                });
+            }
+
+            document.getElementById('btnNavHra')?.addEventListener('click', () => switchView('hra'));
+            document.getElementById('btnNavShop')?.addEventListener('click', () => switchView('shop'));
+            document.getElementById('btnNavFinds')?.addEventListener('click', () => switchView('finds'));
+            document.getElementById('btnNavAccount')?.addEventListener('click', () => switchView('account'));
+            document.getElementById('btnNavBoard')?.addEventListener('click', () => switchView('board'));
+
+            document.getElementById('btnNavShare')?.addEventListener('click', async () => {
+                const fileName = 'Saris-Sprint-Dino.html';
+                const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+                const file = new File([htmlContent], fileName, { type: 'text/html' });
+                const shareText = `🦖 Šariš Sprint: Dino z Východu! Môj rekord: ${Math.floor(bestScore)} puntov, 🪙 ${dzedovePenezi} dzedovych peňezí.`;
+
+                if (navigator.share) {
+                    try {
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ title: 'Šariš Sprint', text: shareText, files: [file] });
+                            showToast('📤 Súbor odoslaný do zdieľania!');
+                            return;
+                        }
+                    } catch (e) {
+                        if (e && e.name === 'AbortError') return;
+                    }
+
+                    try {
+                        await navigator.share({ title: 'Šariš Sprint', text: shareText, url: window.location.href });
+                        showToast('📤 Zdieľané!');
+                        return;
+                    } catch (e) {
+                        if (e && e.name === 'AbortError') return;
+                    }
+                }
+
+                try {
+                    const url = URL.createObjectURL(file);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast(`💾 Súbor ${fileName} stiahnutý!`);
+                } catch (e) {
+                    showToast('❌ Zdieľanie zlyhalo.');
+                }
+            });
+
+            document.getElementById('btnNavSave')?.addEventListener('click', () => {
+                try {
+                    const blob = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'index.html';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('💾 Čistý súbor index.html stiahnutý!');
+                } catch (e) {
+                    showToast('❌ Nepodarilo sa stiahnuť súbor.');
+                }
+            });
+
+            document.getElementById('btnNavApp')?.addEventListener('click', () => {
+                document.getElementById('appModal')?.classList.remove('hidden');
+            });
+            document.getElementById('btnCloseModal')?.addEventListener('click', () => {
+                document.getElementById('appModal')?.classList.add('hidden');
+            });
+
+            // Shop Sub-tabs
+            document.getElementById('btnTabSkins')?.addEventListener('click', () => {
+                const bS = document.getElementById('btnTabSkins');
+                const bM = document.getElementById('btnTabMaps');
+                bS.className = 'bg-amber-500/20 border-amber-500 text-amber-400 border px-4 py-2 rounded-xl text-xs font-bold transition-all';
+                bM.className = 'bg-[#161b22] border-[#30363d] text-gray-400 border px-4 py-2 rounded-xl text-xs font-bold transition-all hover:text-gray-200';
+                document.getElementById('gridDinoSkins')?.classList.remove('hidden');
+                document.getElementById('gridMapSkins')?.classList.add('hidden');
+            });
+
+            document.getElementById('btnTabMaps')?.addEventListener('click', () => {
+                const bS = document.getElementById('btnTabSkins');
+                const bM = document.getElementById('btnTabMaps');
+                bM.className = 'bg-amber-500/20 border-amber-500 text-amber-400 border px-4 py-2 rounded-xl text-xs font-bold transition-all';
+                bS.className = 'bg-[#161b22] border-[#30363d] text-gray-400 border px-4 py-2 rounded-xl text-xs font-bold transition-all hover:text-gray-200';
+                document.getElementById('gridMapSkins')?.classList.remove('hidden');
+                document.getElementById('gridDinoSkins')?.classList.add('hidden');
+            });
+
+            document.getElementById('btnAccountSubmit')?.addEventListener('click', handleAccountAuth);
+            document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
+            document.getElementById('btnRefreshBoard')?.addEventListener('click', fetchLeaderboard);
+
+            // Special Admin Screen Lock logic (password: Martinuse)
+            const ADMIN_PASS = 'Martinuse';
+            document.getElementById('btnOpenAdminScreen')?.addEventListener('click', () => {
+                const lockBox = document.getElementById('adminLockBox');
+                const specialScreen = document.getElementById('adminSpecialScreen');
+                if (specialScreen && !specialScreen.classList.contains('hidden')) return;
+                if (lockBox) {
+                    lockBox.classList.toggle('hidden');
+                    if (!lockBox.classList.contains('hidden')) document.getElementById('inputAdminPass')?.focus();
+                }
+            });
+
+            document.getElementById('btnAdminLogin')?.addEventListener('click', () => {
+                const pass = (document.getElementById('inputAdminPass')?.value || '').trim();
+                const lockMsg = document.getElementById('adminLockMsg');
+                const lockBox = document.getElementById('adminLockBox');
+                const specialScreen = document.getElementById('adminSpecialScreen');
+                if (pass === ADMIN_PASS) {
+                    isAdminMode = true;
+                    if (lockMsg) lockMsg.textContent = '';
+                    lockBox?.classList.add('hidden');
+                    specialScreen?.classList.remove('hidden');
+                    specialScreen?.classList.add('flex');
+                    updateHUD();
+                    showToast('🛡️ Admin režim aktívny – body sa nerátajú do rebríčka');
+                    playSound('collect');
+                } else {
+                    if (lockMsg) lockMsg.textContent = '❌ Nesprávne admin heslo!';
+                    playSound('hit');
+                }
+            });
+
+            document.getElementById('btnAdminClose')?.addEventListener('click', () => {
+                isAdminMode = false;
+                const specialScreen = document.getElementById('adminSpecialScreen');
+                specialScreen?.classList.add('hidden');
+                specialScreen?.classList.remove('flex');
+                const inp = document.getElementById('inputAdminPass');
+                if (inp) inp.value = '';
+                updateHUD();
+            });
+
+            const setAdminStatus = (txt) => {
+                const el = document.getElementById('adminActionMsg');
+                if (el) el.textContent = txt;
+                saveData();
+                updateHUD();
+                renderShop();
+            };
+
+            document.getElementById('btnAdminAdd100')?.addEventListener('click', () => {
+                dzedovePenezi += 100;
+                setAdminStatus('✅ Pridaných +100 dzedovych peňezí.');
+            });
+
+            document.getElementById('btnAdminAdd800')?.addEventListener('click', () => {
+                dzedovePenezi += 800;
+                setAdminStatus('✅ Pridaných +800 dzedovych peňezí.');
+            });
+
+            document.getElementById('btnAdminResetCoins')?.addEventListener('click', () => {
+                dzedovePenezi = 0;
+                setAdminStatus('✅ Dzedove peňeži vynulované na 0.');
+            });
+
+            document.getElementById('btnAdminUnlockAll')?.addEventListener('click', () => {
+                ownedSkins = SKINS.map(s => s.id);
+                ownedMaps = MAPS.map(m => m.id);
+                setAdminStatus('✅ Všetky skiny a mapy odomknuté.');
+            });
+
+            document.getElementById('btnAdminUnlockFinds')?.addEventListener('click', () => {
+                unlockedFinds = FINDS_CATALOG.map(f => f.id);
+                renderFinds();
+                setAdminStatus('✅ Všetky findy odomknuté.');
+            });
+
+            // Action Buttons
+            document.getElementById('btnStart')?.addEventListener('click', startGame);
+            document.getElementById('btnCtrlStart')?.addEventListener('click', startGame);
+            document.getElementById('btnRestart')?.addEventListener('click', startGame);
+            document.getElementById('btnResume')?.addEventListener('click', togglePause);
+            document.getElementById('btnCtrlPause')?.addEventListener('click', togglePause);
+
+            const jumpBtn = document.getElementById('btnCtrlJump');
+            if (jumpBtn) {
+                jumpBtn.addEventListener('click', jump);
+                jumpBtn.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); }, { passive: false });
+            }
+
+            const duckBtn = document.getElementById('btnCtrlDuck');
+            if (duckBtn) {
+                duckBtn.addEventListener('mousedown', () => setDuck(true));
+                duckBtn.addEventListener('mouseup', () => setDuck(false));
+                duckBtn.addEventListener('mouseleave', () => setDuck(false));
+                duckBtn.addEventListener('touchstart', (e) => { e.preventDefault(); setDuck(true); }, { passive: false });
+                duckBtn.addEventListener('touchend', (e) => { e.preventDefault(); setDuck(false); }, { passive: false });
+            }
+
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) {
+                canvas.addEventListener('pointerdown', () => {
+                    if (!gameRunning || gameOver) return;
+                    if (gamePaused) togglePause();
+                    else jump();
+                });
+            }
+
+            // Keyboard Shortcuts
+            window.addEventListener('keydown', (e) => {
+                if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+                if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+                    e.preventDefault();
+                    if (!gameRunning || gameOver) startGame();
+                    else if (gamePaused) togglePause();
+                    else jump();
+                } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+                    e.preventDefault();
+                    setDuck(true);
+                } else if (e.code === 'KeyP' || e.code === 'Escape') {
+                    togglePause();
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+                    setDuck(false);
+                }
+            });
+
+            draw();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+
+</body></html>
