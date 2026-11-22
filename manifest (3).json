@@ -1,0 +1,64 @@
+{
+  "id": "saris-sprint-dino-z-vychodu",
+  "name": "Šariš Sprint: Dino z Východu",
+  "short_name": "Šariš Sprint",
+  "description": "Východniarsky dino runner so skinmi, mapami, striedaním dňa, noci a počasia a zbierkou 30 východniarskych nálezov.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "landscape-primary",
+  "background_color": "#0b0f17",
+  "theme_color": "#f97316",
+  "lang": "sk",
+  "dir": "ltr",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Spustiť hru",
+      "short_name": "Hrať",
+      "description": "Rýchle spustenie hry Šariš Sprint",
+      "url": "./",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
